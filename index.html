@@ -1,1037 +1,204 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>コードエディター</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Noto+Sans+JP&display=swap" rel="stylesheet">
-    <!-- Import the syntax highlighter CSS -->
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        color: #333333;
-        font-family: "Fira Code", monospace;
-      }
-      .container {
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        width: 100%;
-        background-color: #f5f5f5;
-      }
-      .menubar {
-        height: 30px;
-        width: 100%;
-        background-color: #e0e0e0;
-        display: flex;
-        align-items: center;
-        padding: 0 15px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      }
-      .menubar span {
-        margin-right: 20px;
-        cursor: pointer;
-      }
-      .content {
-        display: flex;
-        flex: 1;
-        height: calc(100vh - 90px);
-      }
-      .sidebar {
-        width: 200px;
-        background-color: #f0f0f0;
-        border-right: 1px solid #ddd;
-        overflow-y: auto;
-      }
-      .file-item {
-        padding: 8px 15px;
-        cursor: pointer;
-        border-bottom: 1px solid #eee;
-      }
-      .file-item:hover {
-        background-color: #e5e5e5;
-      }
-      .file-item.active {
-        background-color: #ddd;
-      }
-      .folder {
-        font-weight: bold;
-      }
-      .file-content {
-        margin-left: 15px;
-      }
-      .main-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-      }
-      .filename-cards {
-        width: 100%;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        background-color: #e8e8e8;
-        border-bottom: 1px solid #ddd;
-        overflow-x: auto;
-      }
-      .filename-card {
-        background-color: #f5f5f5;
-        height: 100%;
-        padding: 0 20px;
-        display: flex;
-        align-items: center;
-        border-right: 1px solid #ddd;
-        white-space: nowrap;
-      }
-      .filename-card.active {
-        background-color: #fff;
-        border-bottom: 2px solid #4285f4;
-      }
-      .editarea {
-        flex: 1;
-        display: flex;
-        background-color: #fff;
-        position: relative;
-      }
-      .edittext {
-        height: 100%;
-        width: 100%;
-        overflow-y: auto;
-        padding: 0;
-        position: relative;
-      }
-      .textarea-container {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        display: flex;
-      }
-      .line-numbers {
-        background: #f5f5f5;
-        color: #999;
-        text-align: right;
-        padding: 10px 5px;
-        margin: 0;
-        user-select: none;
-        min-width: 40px;
-        border-right: 1px solid #ddd;
-      }
-      .code-editor {
-        flex: 1;
-        margin: 0;
-        padding: 10px;
-        border: none;
-        resize: none;
-        font-family: "Fira Code", monospace;
-        font-size: 14px;
-        line-height: 1.5;
-        white-space: pre;
-        tab-size: 4;
-        overflow-y: auto;
-        color: #333;
-        background-color: #fff;
-      }
-      .code-editor:focus {
-        outline: none;
-      }
-      /* The highlighter overlay that will be populated by our extension */
-      .highlighter {
-        position: absolute;
-        pointer-events: none;
-        top: 10px;
-        left: 10px;
-        right: 10px;
-        bottom: 10px;
-        white-space: pre;
-        font-family: "Fira Code", monospace;
-        font-size: 14px;
-        line-height: 1.5;
-        color: transparent;
-        overflow: hidden;
-      }
-      .file-import {
-        padding: 10px;
-        background-color: #f0f0f0;
-        border-bottom: 1px solid #ddd;
-        display: flex;
-        align-items: center;
-      }
-      .file-import label {
-        display: inline-block;
-        padding: 6px 12px;
-        cursor: pointer;
-        background-color: #4285f4;
-        color: white;
-        border-radius: 4px;
-        margin-right: 10px;
-      }
-      .button {
-        display: inline-block;
-        padding: 6px 12px;
-        cursor: pointer;
-        color: white;
-        border-radius: 4px;
-        margin-right: 10px;
-        border: none;
-      }
-      .export-btn {
-        background-color: #34a853;
-      }
-      .save-btn {
-        background-color: #fbbc05;
-      }
-      .button:disabled {
-        background-color: #ccc;
-        cursor: not-allowed;
-      }
-      .file-import input[type="file"] {
-        display: none;
-      }
-      .file-import-info {
-        display: inline-block;
-        font-size: 0.9em;
-        color: #666;
-        flex: 1;
-      }
-      .status-bar {
-        height: 25px;
-        background-color: #e0e0e0;
-        border-top: 1px solid #ddd;
-        display: flex;
-        align-items: center;
-        padding: 0 10px;
-        font-size: 12px;
-        color: #666;
-        justify-content: space-between;
-      }
-      .status-info {
-        display: flex;
-        align-items: center;
-      }
-      .status-indicator {
-        margin-left: 15px;
-      }
-      .status-indicator.modified {
-        color: #fbbc05;
-      }
-      .status-indicator.saved {
-        color: #34a853;
-      }
-      .file-type-icon {
-        margin-right: 5px;
-        font-size: 0.8em;
-      }
-      .html-icon::before { content: "📄"; }
-      .css-icon::before { content: "🎨"; }
-      .js-icon::before { content: "📜"; }
-      .folder-icon::before { content: "📁"; }
-      .text-icon::before { content: "📝"; }
-      .image-icon::before { content: "🖼️"; }
-      
-      /* Modal styles */
-      .modal {
-        display: none;
-        position: fixed;
-        z-index: 1000;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0,0,0,0.5);
-      }
-      .modal-content {
-        background-color: #fefefe;
-        margin: 15% auto;
-        padding: 20px;
-        border-radius: 5px;
-        width: 50%;
-        max-width: 500px;
-      }
-      .close-modal {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-      .close-modal:hover {
-        color: black;
-      }
-      .modal h3 {
-        margin-top: 0;
-      }
-      .export-options {
-        margin: 15px 0;
-      }
-      .export-options label {
-        display: block;
-        margin: 10px 0;
-      }
-      .dropdown-menu {
-        position: absolute;
-        display: none;
-        background-color: white;
-        border: 1px solid #ddd;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        z-index: 100;
-        min-width: 150px;
-      }
-      .dropdown-item {
-        padding: 8px 15px;
-        cursor: pointer;
-      }
-      .dropdown-item:hover {
-        background-color: #f5f5f5;
-      }
-      .tooltip {
-        position: fixed;
-        background-color: rgba(0,0,0,0.8);
-        color: white;
-        padding: 5px 10px;
-        border-radius: 4px;
-        font-size: 12px;
-        z-index: 1000;
-        display: none;
-      }
-      /* Syntax Highlighter Styles */
-
-/* Common token styles */
-.token.keyword {
-  color: #07a;
-}
-.token.string {
-  color: #d20;
-}
-.token.number {
-  color: #164;
-}
-.token.boolean {
-  color: #07a;
-}
-.token.comment {
-  color: #998;
-  font-style: italic;
-}
-.token.operator {
-  color: #a67f59;
-}
-.token.function {
-  color: #dd4a68;
-}
-.token.punctuation {
-  color: #999;
-}
-.token.regex {
-  color: #e90;
-}
-.token.property {
-  color: #905;
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>Simple Web Code Editor</title>
+  <!-- CodeMirror (via CDN) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/htmlmixed/htmlmixed.min.js"></script>
+  <link rel="stylesheet" href="./style.css" />
+  <style>
+  	body {
+  font-family: sans-serif;
+  margin: 16px;
 }
 
-/* HTML-specific tokens */
-.token.tag {
-  color: #170;
-}
-.token.attr-name {
-  color: #00c;
-}
-.token.attr-value {
-  color: #d20;
+#fileList {
+  margin-top: 16px;
+  max-width: 300px;
+  float: left;
 }
 
-/* CSS-specific tokens */
-.token.selector {
-  color: #11a;
+#filesUl {
+  list-style-type: none;
+  padding-left: 0;
+  border: 1px solid #ccc;
+  min-height: 100px;
 }
-.token.important {
-  color: #e90;
-  font-weight: bold;
-}
-.token.variable {
-  color: #e90;
-}
-.token.entity {
-  color: #999;
-  background: rgba(255, 255, 255, 0.5);
-}
-.token.doctype {
-  color: #999;
-  font-style: italic;
-}
-.token.url {
-  color: #00c;
-}
-.token.unit {
-  color: #a67f59;
-}
-.token.color {
-  color: #c0f;
-}
-    </style>
-  </head>
-  <body>
-    <div id="tooltip" class="tooltip"></div>
-    <div class="container">
-      <div class="menubar">
-        <span id="file-menu">ファイル</span>
-        <span id="edit-menu">編集</span>
-        <span id="view-menu">表示</span>
-        <span id="help-menu">ヘルプ</span>
-        <div id="file-dropdown" class="dropdown-menu">
-          <div class="dropdown-item" id="menu-open-folder">フォルダを開く</div>
-          <div class="dropdown-item" id="menu-save">保存 (Ctrl+S)</div>
-          <div class="dropdown-item" id="menu-export">エキスポート</div>
-        </div>
-      </div>
-      <div class="file-import">
-        <label for="directory-input">ディレクトリを開く</label>
-        <input type="file" id="directory-input" webkitdirectory directory multiple>
-        <button id="save-btn" class="button save-btn" disabled>保存</button>
-        <button id="export-btn" class="button export-btn" disabled>エキスポート</button>
-        <span class="file-import-info" id="file-import-info">フォルダをインポートしてください</span>
-      </div>
-      <div class="content">
-        <div class="sidebar" id="file-sidebar">
-          <!-- Files will be loaded here -->
-        </div>
-        <div class="main-content">
-          <div class="filename-cards" id="tabs">
-            <!-- Active file tabs will be shown here -->
-          </div>
-          <div class="editarea">
-            <div class="edittext" id="editor">
-              <div class="textarea-container">
-                <div class="line-numbers" id="line-numbers"></div>
-                <textarea class="code-editor" id="code-editor" spellcheck="false"></textarea>
-                <div class="highlighter" id="syntax-highlighter"></div>
-              </div>
-            </div>
-          </div>
-          <div class="status-bar">
-            <div class="status-info">
-              <span id="cursor-position">行: 1, 列: 1</span>
-              <span id="file-status" class="status-indicator"></span>
-            </div>
-            <div class="status-info">
-              <span id="date-display">2025-04-11 01:39:36</span>
-              <span id="username-display" style="margin-left: 10px;">mituki1234</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Export Modal -->
-    <div id="export-modal" class="modal">
-      <div class="modal-content">
-        <span class="close-modal" id="close-modal">&times;</span>
-        <h3>エキスポート・オプション</h3>
-        <div class="export-options">
-          <label>
-            <input type="radio" name="export-type" value="zip" checked> ZIPファイルとして全ファイルをエキスポート
-          </label>
-          <label>
-            <input type="radio" name="export-type" value="current"> 現在開いているファイルのみエキスポート
-          </label>
-        </div>
-        <button id="confirm-export" class="button export-btn">エキスポート</button>
-      </div>
-    </div>
-    
-    <script>
-    	/**
- * Main Code Editor Application
- */
-(function() {
-    let fileSystem = {};
-    let openFiles = [];
-    let activeFile = null;
-    let fileBlobs = {};
-    let lastSavedState = {};
-    let tabSize = 4;
-    let extensions = {};
-    
-    window.addEventListener('load', init);
-    
-    function init() {
-        setupDropdownMenus();
-        setupDirectoryInput();
-        setupSaveButton();
-        setupExportButton();
-        setupEventListeners();
-        updateEditor();
-        document.getElementById('date-display').textContent = "2025-04-11 01:39:36";
-        document.getElementById('username-display').textContent = "mituki1234";
-        window.CodeEditor = {
-            registerExtension: function(name, extension) {
-                extensions[name] = extension;
-                console.log(`Extension registered: ${name}`);
-            },
-            getExtension: function(name) {
-                return extensions[name];
-            }
-        };
-        window.dispatchEvent(new CustomEvent('CodeEditorReady'));
+#filesUl li {
+  cursor: pointer;
+  padding: 4px 8px;
+  border-bottom: 1px solid #eee;
+}
+
+#filesUl li:hover {
+  background-color: #f0f0f0;
+}
+
+#editorWrapper {
+  margin-left: 320px;
+  margin-top: 16px;
+}
+
+.CodeMirror {
+  border: 1px solid #ccc;
+  height: 500px;
+}
+
+/* カスタムシンタックスハイライト例 (4色指定) */
+.cm-tag,
+.cm-keyword {
+  color: red !important;
+}
+.cm-attribute,
+.cm-property {
+  color: blue !important;
+}
+.cm-string {
+  color: yellow !important;
+}
+.cm-def /* functions and definitions */ {
+  color: purple !important;
+}
+  </style>
+</head>
+<body>
+  <h1>Simple Web Code Editor</h1>
+  <div>
+    <button id="openDirBtn">フォルダを開く</button>
+    <button id="createFileBtn">新規ファイル作成</button>
+    <button id="saveFileBtn">保存</button>
+  </div>
+  <div id="fileList">
+    <h3>ファイル一覧:</h3>
+    <ul id="filesUl"></ul>
+  </div>
+  <div id="editorWrapper">
+    <textarea id="editor"></textarea>
+  </div>
+
+ 	<script>
+ 		/****************************************************
+ * Simple Web Code Editor
+ * - Uses File System Access API for folder selection
+ * - Provides basic CodeMirror editor
+ * - Allows creation of new files
+ * - Requires user confirmation to save (no autosave)
+ ****************************************************/
+
+let currentFileHandle = null;
+let directoryHandle = null;
+let editorInstance = null;
+
+window.addEventListener('load', () => {
+  // Initialize CodeMirror
+  const editorTextArea = document.getElementById('editor');
+  editorInstance = CodeMirror.fromTextArea(editorTextArea, {
+    mode: 'htmlmixed',
+    lineNumbers: true
+  });
+
+  const openDirBtn = document.getElementById('openDirBtn');
+  openDirBtn.addEventListener('click', openDirectory);
+
+  const createFileBtn = document.getElementById('createFileBtn');
+  createFileBtn.addEventListener('click', createNewFile);
+
+  const saveFileBtn = document.getElementById('saveFileBtn');
+  saveFileBtn.addEventListener('click', saveCurrentFile);
+});
+
+// Open directory and read contents
+async function openDirectory() {
+  try {
+    directoryHandle = await window.showDirectoryPicker();
+    await listFiles(directoryHandle);
+  } catch (err) {
+    console.error('Directory access cancelled or failed:', err);
+  }
+}
+
+// Recursively list files in the chosen directory
+async function listFiles(dirHandle) {
+  const filesUl = document.getElementById('filesUl');
+  filesUl.innerHTML = '';
+
+  for await (const [name, handle] of dirHandle.entries()) {
+    if (handle.kind === 'file') {
+      const li = document.createElement('li');
+      li.textContent = name;
+      li.addEventListener('click', () => loadFile(handle));
+      filesUl.appendChild(li);
     }
-    
-    function setupDropdownMenus() {
-        const fileMenu = document.getElementById('file-menu');
-        const fileDropdown = document.getElementById('file-dropdown');
-        fileMenu.addEventListener('click', (e) => {
-            fileDropdown.style.display = fileDropdown.style.display === 'block' ? 'none' : 'block';
-            fileDropdown.style.top = (e.target.offsetTop + e.target.offsetHeight) + 'px';
-            fileDropdown.style.left = e.target.offsetLeft + 'px';
-            e.stopPropagation();
-        });
-        document.addEventListener('click', () => {
-            fileDropdown.style.display = 'none';
-        });
-        document.getElementById('menu-open-folder').addEventListener('click', () => {
-            document.getElementById('directory-input').click();
-        });
-        document.getElementById('menu-save').addEventListener('click', () => {
-            saveFile();
-        });
-        document.getElementById('menu-export').addEventListener('click', () => {
-            showExportModal();
-        });
-    }
-    
-    function setupDirectoryInput() {
-        const directoryInput = document.getElementById('directory-input');
-        directoryInput.addEventListener('change', handleDirectorySelect);
-    }
-    
-    function setupSaveButton() {
-        const saveBtn = document.getElementById('save-btn');
-        saveBtn.addEventListener('click', saveFile);
-        setupTooltips();
-    }
-    
-    function setupTooltips() {
-        const tooltip = document.getElementById('tooltip');
-        const elements = document.querySelectorAll('[data-tooltip]');
-        elements.forEach(element => {
-            element.addEventListener('mouseenter', (e) => {
-                const text = e.target.getAttribute('data-tooltip');
-                tooltip.textContent = text;
-                tooltip.style.display = 'block';
-                const rect = e.target.getBoundingClientRect();
-                tooltip.style.left = (rect.left + rect.width / 2 - tooltip.offsetWidth / 2) + 'px';
-                tooltip.style.top = (rect.bottom + 5) + 'px';
-            });
-            element.addEventListener('mouseleave', () => {
-                tooltip.style.display = 'none';
-            });
-        });
-    }
-    
-    function setupExportButton() {
-        const exportBtn = document.getElementById('export-btn');
-        exportBtn.addEventListener('click', showExportModal);
-        const closeModal = document.getElementById('close-modal');
-        closeModal.addEventListener('click', () => {
-            document.getElementById('export-modal').style.display = 'none';
-        });
-        const confirmExport = document.getElementById('confirm-export');
-        confirmExport.addEventListener('click', handleExport);
-        window.addEventListener('click', (e) => {
-            const modal = document.getElementById('export-modal');
-            if (e.target === modal) {
-                modal.style.display = 'none';
-            }
-        });
-    }
-    
-    function showExportModal() {
-        document.getElementById('export-modal').style.display = 'block';
-    }
-    
-    function saveFile() {
-        if (!activeFile) {
-            showNotification('保存するファイルがありません');
-            return;
-        }
-        saveCurrentFileChanges();
-        const activeFileObj = openFiles.find(file => file.path === activeFile);
-        if (!activeFileObj || activeFileObj.isBinary) {
-            showNotification('このファイルは保存できません');
-            return;
-        }
-        const blob = new Blob([activeFileObj.content], {type: 'text/plain'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = activeFileObj.fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        activeFileObj.originalContent = activeFileObj.content;
-        lastSavedState[activeFile] = activeFileObj.content;
-        updateFileStatus('保存しました', 'saved');
-        updateTabs();
-    }
-    
-    function showNotification(message, type = '') {
-        updateFileStatus(message, type);
-        setTimeout(() => {
-            updateFileStatus();
-        }, 3000);
-    }
-    
-    function updateFileStatus(message = '', type = '') {
-        const fileStatus = document.getElementById('file-status');
-        fileStatus.textContent = message;
-        fileStatus.className = 'status-indicator';
-        if (type) {
-            fileStatus.classList.add(type);
-        }
-    }
-    
-    async function handleExport() {
-        const exportType = document.querySelector('input[name="export-type"]:checked').value;
-        saveCurrentFileChanges();
-        if (exportType === 'zip') {
-            await exportAsZip();
-        } else if (exportType === 'current') {
-            exportCurrentFile();
-        }
-        document.getElementById('export-modal').style.display = 'none';
-    }
-    
-    async function exportAsZip() {
-        try {
-            if (typeof JSZip === 'undefined') {
-                await loadJSZip();
-            }
-            const zip = new JSZip();
-            openFiles.forEach(file => {
-                zip.file(file.path, file.content);
-            });
-            for (const [path, blob] of Object.entries(fileBlobs)) {
-                if (!openFiles.some(file => file.path === path)) {
-                    zip.file(path, blob);
-                }
-            }
-            const content = await zip.generateAsync({type: 'blob'});
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(content);
-            a.download = `code-export-${timestamp}.zip`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            showNotification('ZIPファイルをエキスポートしました', 'saved');
-        } catch (error) {
-            console.error('Error exporting as ZIP:', error);
-            showNotification('エキスポート中にエラーが発生しました: ' + error.message);
-        }
-    }
-    
-    function loadJSZip() {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
-            script.onload = resolve;
-            script.onerror = () => reject(new Error('JSZip ライブラリの読み込みに失敗しました'));
-            document.head.appendChild(script);
-        });
-    }
-    
-    function exportCurrentFile() {
-        if (!activeFile) {
-            showNotification('エキスポートするファイルがありません');
-            return;
-        }
-        const activeFileObj = openFiles.find(file => file.path === activeFile);
-        if (!activeFileObj) return;
-        const blob = new Blob([activeFileObj.content], {type: 'text/plain'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = activeFileObj.fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        showNotification('ファイルをエキスポートしました', 'saved');
-    }
-    
-    function handleDirectorySelect(event) {
-        const files = event.target.files;
-        if (files.length === 0) return;
-        fileSystem = {};
-        openFiles = [];
-        activeFile = null;
-        fileBlobs = {};
-        lastSavedState = {};
-        let fileCount = 0;
-        let folderCount = 0;
-        const paths = new Set();
-        Array.from(files).forEach(file => {
-            const path = file.webkitRelativePath;
-            paths.add(path.split('/')[0]);
-            addFileToSystem(path, file);
-            fileBlobs[path] = file;
-            fileCount++;
-        });
-        folderCount = countFolders(fileSystem);
-        document.getElementById('export-btn').disabled = false;
-        document.getElementById('save-btn').disabled = false;
-        document.getElementById('file-import-info').textContent =
-          `インポート完了: ${fileCount} ファイル, ${folderCount} フォルダ (${Array.from(paths).join(', ')})`;
-        renderFileSystem();
-        updateTabs();
-        updateEditor();
-    }
-    
-    function countFolders(structure) {
-        let count = 0;
-        Object.entries(structure).forEach(([name, item]) => {
-            if (item.type === 'folder') {
-                count++;
-                count += countFolders(item.children);
-            }
-        });
-        return count;
-    }
-    
-    function addFileToSystem(path, fileObj) {
-        const parts = path.split('/');
-        let current = fileSystem;
-        for (let i = 0; i < parts.length - 1; i++) {
-            const part = parts[i];
-            if (!current[part]) {
-                current[part] = { type: 'folder', children: {} };
-            }
-            current = current[part].children;
-        }
-        const fileName = parts[parts.length - 1];
-        current[fileName] = { type: 'file', fileObj: fileObj };
-    }
-    
-    function renderFileSystem(structure = fileSystem, parentPath = '', parentElement = null) {
-        const sidebar = parentElement || document.getElementById('file-sidebar');
-        if (parentPath === '' && !parentElement) {
-            sidebar.innerHTML = '';
-        }
-        const entries = Object.entries(structure).sort((a, b) => {
-            if (a[1].type === 'folder' && b[1].type !== 'folder') return -1;
-            if (a[1].type !== 'folder' && b[1].type === 'folder') return 1;
-            return a[0].localeCompare(b[0]);
-        });
-        entries.forEach(([name, item]) => {
-            const currentPath = parentPath ? `${parentPath}/${name}` : name;
-            if (item.type === 'file') {
-                const fileElement = createFileElement(name, currentPath);
-                sidebar.appendChild(fileElement);
-            } else if (item.type === 'folder') {
-                const folderElement = createFolderElement(name, currentPath);
-                sidebar.appendChild(folderElement);
-                const childrenContainer = document.createElement('div');
-                childrenContainer.className = 'file-content';
-                childrenContainer.id = `folder-content-${currentPath.replace(/\//g, '-')}`;
-                childrenContainer.style.display = parentPath === '' ? 'block' : 'none';
-                sidebar.appendChild(childrenContainer);
-                renderFileSystem(item.children, currentPath, childrenContainer);
-            }
-        });
-    }
-    
-    function createFileElement(name, path) {
-        const fileExt = name.split('.').pop().toLowerCase();
-        const fileItem = document.createElement('div');
-        fileItem.className = 'file-item';
-        fileItem.dataset.path = path;
-        let iconClass = '';
-        switch (fileExt) {
-            case 'html': iconClass = 'html-icon'; break;
-            case 'css': iconClass = 'css-icon'; break;
-            case 'js': iconClass = 'js-icon'; break;
-            case 'jpg': case 'jpeg': case 'png': case 'gif': case 'svg': 
-                iconClass = 'image-icon'; break;
-            default: iconClass = 'text-icon'; break;
-        }
-        fileItem.innerHTML = `<span class="file-type-icon ${iconClass}"></span>${name}`;
-        fileItem.addEventListener('click', () => {
-            openFile(path);
-        });
-        return fileItem;
-    }
-    
-    function createFolderElement(name, path) {
-        const folderItem = document.createElement('div');
-        folderItem.className = 'file-item folder';
-        folderItem.dataset.path = path;
-        folderItem.innerHTML = `<span class="file-type-icon folder-icon"></span>${name}`;
-        folderItem.addEventListener('click', () => {
-            const contentId = `folder-content-${path.replace(/\//g, '-')}`;
-            const content = document.getElementById(contentId);
-            content.style.display = content.style.display === 'none' ? 'block' : 'none';
-        });
-        return folderItem;
-    }
-    
-    function getFile(path) {
-        const parts = path.split('/');
-        let current = fileSystem;
-        for (let i = 0; i < parts.length - 1; i++) {
-            const part = parts[i];
-            if (!current[part] || current[part].type !== 'folder') {
-                return null;
-            }
-            current = current[part].children;
-        }
-        const fileName = parts[parts.length - 1];
-        return current[fileName];
-    }
-    
-    function isTextFile(file) {
-        const textTypes = [
-            'text/', 'application/json', 'application/javascript', 'application/xml',
-            'application/xhtml+xml', 'application/x-httpd-php'
-        ];
-        const type = file.type;
-        if (type && textTypes.some(textType => type.startsWith(textType))) {
-            return true;
-        }
-        const ext = file.name.split('.').pop().toLowerCase();
-        const textExtensions = [
-            'txt', 'html', 'htm', 'css', 'js', 'json', 'xml', 'md', 'markdown',
-            'php', 'py', 'rb', 'c', 'cpp', 'h', 'java', 'go', 'ts', 'tsx', 'jsx',
-            'yaml', 'yml', 'conf', 'ini', 'cfg', 'sh', 'bat', 'csv'
-        ];
-        return textExtensions.includes(ext);
-    }
-    
-    async function readFileContent(file) {
-        return new Promise((resolve, reject) => {
-            if (isTextFile(file)) {
-                const reader = new FileReader();
-                reader.onload = event => resolve(event.target.result);
-                reader.onerror = error => reject(error);
-                reader.readAsText(file);
-            } else {
-                resolve(`[バイナリファイルは編集できません: ${file.name} (${file.type || 'unknown type'})]`);
-            }
-        });
-    }
-    
-    async function openFile(path) {
-        const file = getFile(path);
-        if (!file) return;
-        saveCurrentFileChanges();
-        const fileIndex = openFiles.findIndex(f => f.path === path);
-        if (fileIndex === -1) {
-            const fileName = path.split('/').pop();
-            try {
-                const content = await readFileContent(file.fileObj);
-                const isBinary = !isTextFile(file.fileObj);
-                openFiles.push({ path, fileName, content, originalContent: content, isBinary });
-                lastSavedState[path] = content;
-            } catch (error) {
-                console.error('Error reading file:', error);
-                return;
-            }
-        }
-        activeFile = path;
-        updateTabs();
-        updateEditor();
-        updateFileStatus();
-    }
-    
-    function checkFileModified() {
-        if (!activeFile) return;
-        const activeFileObj = openFiles.find(file => file.path === activeFile);
-        if (!activeFileObj) return;
-        if (activeFileObj.content !== activeFileObj.originalContent) {
-            updateFileStatus('変更あり', 'modified');
-        } else {
-            updateFileStatus();
-        }
-    }
-    
-    function updateTabs() {
-        const tabsContainer = document.getElementById('tabs');
-        tabsContainer.innerHTML = '';
-        openFiles.forEach(file => {
-            const tab = document.createElement('div');
-            tab.className = 'filename-card';
-            if (file.path === activeFile) {
-                tab.className += ' active';
-            }
-            let fileName = file.fileName;
-            if (file.content !== file.originalContent) {
-                fileName += ' *';
-            }
-            tab.textContent = fileName;
-            tab.dataset.path = file.path;
-            tab.addEventListener('click', () => {
-                saveCurrentFileChanges();
-                activeFile = file.path;
-                updateTabs();
-                updateEditor();
-                checkFileModified();
-            });
-            tabsContainer.appendChild(tab);
-        });
-    }
-    
-    function saveCurrentFileChanges() {
-        if (!activeFile) return;
-        const codeEditor = document.getElementById('code-editor');
-        const currentContent = codeEditor.value;
-        const activeFileObj = openFiles.find(file => file.path === activeFile);
-        if (activeFileObj && !activeFileObj.isBinary) {
-            activeFileObj.content = currentContent;
-            updateTabs();
-        }
-    }
-    
-    function updateEditor() {
-        const codeEditor = document.getElementById('code-editor');
-        const lineNumbers = document.getElementById('line-numbers');
-        const highlighter = document.getElementById('syntax-highlighter');
-        if (!activeFile) {
-            codeEditor.value = '';
-            lineNumbers.innerHTML = '';
-            codeEditor.disabled = true;
-            highlighter.innerHTML = '';
-            return;
-        }
-        const activeFileObj = openFiles.find(file => file.path === activeFile);
-        if (!activeFileObj) {
-            codeEditor.value = '';
-            lineNumbers.innerHTML = '';
-            codeEditor.disabled = true;
-            highlighter.innerHTML = '';
-            return;
-        }
-        if (activeFileObj.isBinary) {
-            codeEditor.value = activeFileObj.content;
-            codeEditor.disabled = true;
-            highlighter.innerHTML = '';
-        } else {
-            codeEditor.disabled = false;
-            codeEditor.value = activeFileObj.content;
-            // Determine language by file extension and use appropriate extension if available
-            const fileExt = activeFileObj.fileName.split('.').pop().toLowerCase();
-            let highlighted = '';
-            if (fileExt === 'js' && window.JSHighlighter) {
-                highlighted = window.JSHighlighter.highlight(activeFileObj.content);
-            } else if ((fileExt === 'html' || fileExt === 'htm') && window.HTMLHighlighter) {
-                highlighted = window.HTMLHighlighter.highlight(activeFileObj.content);
-            } else if (fileExt === 'css' && window.CSSHighlighter) {
-                highlighted = window.CSSHighlighter.highlight(activeFileObj.content);
-            } else {
-                highlighted = activeFileObj.content;
-            }
-            highlighter.innerHTML = highlighted;
-        }
-        updateLineNumbers();
-        if (!codeEditor.disabled) {
-            codeEditor.focus();
-        }
-    }
-    
-    function updateLineNumbers() {
-        const codeEditor = document.getElementById('code-editor');
-        const lineNumbers = document.getElementById('line-numbers');
-        const lines = codeEditor.value.split('\n');
-        lineNumbers.innerHTML = lines.map((_, i) => `<div>${i + 1}</div>`).join('');
-    }
-    
-    function updateCursorPosition() {
-        const codeEditor = document.getElementById('code-editor');
-        const cursorPosition = document.getElementById('cursor-position');
-        const text = codeEditor.value;
-        const cursorPos = codeEditor.selectionStart;
-        const textBeforeCursor = text.substring(0, cursorPos);
-        const line = (textBeforeCursor.match(/\n/g) || []).length + 1;
-        const lastNewLine = textBeforeCursor.lastIndexOf('\n');
-        const column = (lastNewLine === -1) ? cursorPos + 1 : cursorPos - lastNewLine;
-        cursorPosition.textContent = `行: ${line}, 列: ${column}`;
-    }
-    
-    function getLineIndentation(text, position) {
-        const startOfLine = text.lastIndexOf('\n', position - 1) + 1;
-        let indentation = '';
-        for (let i = startOfLine; i < text.length && (text[i] === ' ' || text[i] === '\t'); i++) {
-            indentation += text[i];
-        }
-        return indentation;
-    }
-    
-    function setupEventListeners() {
-        const codeEditor = document.getElementById('code-editor');
-        codeEditor.addEventListener('input', () => {
-            updateLineNumbers();
-            if (activeFile) {
-                const activeFileObj = openFiles.find(file => file.path === activeFile);
-                if (activeFileObj && !activeFileObj.isBinary && codeEditor.value !== activeFileObj.content) {
-                    saveCurrentFileChanges();
-                    checkFileModified();
-                    const fileExt = activeFileObj.fileName.split('.').pop().toLowerCase();
-                    if (fileExt === 'js' && window.JSHighlighter) {
-                        document.getElementById('syntax-highlighter').innerHTML = window.JSHighlighter.highlight(codeEditor.value);
-                    } else if ((fileExt === 'html' || fileExt === 'htm') && window.HTMLHighlighter) {
-                        document.getElementById('syntax-highlighter').innerHTML = window.HTMLHighlighter.highlight(codeEditor.value);
-                    } else if (fileExt === 'css' && window.CSSHighlighter) {
-                        document.getElementById('syntax-highlighter').innerHTML = window.CSSHighlighter.highlight(codeEditor.value);
-                    }
-                }
-            }
-        });
-        codeEditor.addEventListener('click', updateCursorPosition);
-        codeEditor.addEventListener('keyup', (e) => {
-            if (!['Tab', 'Enter'].includes(e.key)) {
-                updateCursorPosition();
-            }
-        });
-        codeEditor.addEventListener('keydown', (e) => {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const start = codeEditor.selectionStart;
-                const end = codeEditor.selectionEnd;
-                const spaces = ' '.repeat(tabSize);
-                codeEditor.value = codeEditor.value.substring(0, start) + spaces + codeEditor.value.substring(end);
-                codeEditor.selectionStart = codeEditor.selectionEnd = start + tabSize;
-                codeEditor.dispatchEvent(new Event('input'));
-            } else if (e.key === 'Enter') {
-                e.preventDefault();
-                const start = codeEditor.selectionStart;
-                const text = codeEditor.value;
-                const indentation = getLineIndentation(text, start);
-                let extraIndent = '';
-                const prevChar = start > 0 ? text[start - 1] : '';
-                if (prevChar === '{' || prevChar === '(' || prevChar === '[') {
-                    extraIndent = ' '.repeat(tabSize);
-                }
-                codeEditor.value = text.substring(0, start) + '\n' + indentation + extraIndent + text.substring(start);
-                const newPosition = start + 1 + indentation.length + extraIndent.length;
-                codeEditor.selectionStart = codeEditor.selectionEnd = newPosition;
-                codeEditor.dispatchEvent(new Event('input'));
-                updateCursorPosition();
-            }
-        });
-        codeEditor.addEventListener('scroll', () => {
-            document.getElementById('line-numbers').scrollTop = codeEditor.scrollTop;
-            document.getElementById('syntax-highlighter').scrollTop = codeEditor.scrollTop;
-        });
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                saveFile();
-            }
-        });
-    }
-    
-    window.addEventListener('load', init);
-})();
-    </script>
-    
-    <!-- Syntax Highlighter Extensions for JS, HTML, and CSS -->
-    <script src="js-highlighter.js"></script>
-    <script src="html-highlighter.js"></script>
-    <script src="css-highlighter.js"></script>
-  </body>
+    // If you wish to display subdirectories, handle them here
+    // else if (handle.kind === 'directory') { ... }
+  }
+}
+
+// Load file content into the editor
+async function loadFile(fileHandle) {
+  currentFileHandle = fileHandle;
+  const fileData = await fileHandle.getFile();
+  const text = await fileData.text();
+  editorInstance.setValue(text);
+  editorInstance.setOption('mode', getModeByFilename(fileHandle.name));
+}
+
+// Determine editor mode by file extension
+function getModeByFilename(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  if (ext === 'html') return 'htmlmixed';
+  if (ext === 'js') return 'javascript';
+  if (ext === 'css') return 'css';
+  // Fallback
+  return 'plaintext';
+}
+
+// Save current file (confirmation required)
+async function saveCurrentFile() {
+  if (!currentFileHandle) {
+    alert('読み込まれたファイルがありません。');
+    return;
+  }
+
+  const confirmSave = confirm('現在のファイルを上書き保存しますか？');
+  if (!confirmSave) return;
+
+  try {
+    const writable = await currentFileHandle.createWritable();
+    await writable.write(editorInstance.getValue());
+    await writable.close();
+    alert('保存が完了しました。');
+  } catch (err) {
+    console.error('保存に失敗:', err);
+  }
+}
+
+// Create a new file in the opened directory
+async function createNewFile() {
+  if (!directoryHandle) {
+    alert('先にフォルダを開いてください。');
+    return;
+  }
+  const fileName = prompt('新しいファイル名を入力してください (例: newfile.html)');
+  if (!fileName) return;
+
+  try {
+    // File System Access API (origin trial)
+    // In some browsers, you can create a file this way:
+    const newFileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
+    currentFileHandle = newFileHandle;
+    editorInstance.setValue('');
+    editorInstance.setOption('mode', getModeByFilename(fileName));
+    await listFiles(directoryHandle);
+  } catch (err) {
+    console.error('新規ファイル作成に失敗:', err);
+  }
+}
+ 	</script>
+</body>
 </html>
