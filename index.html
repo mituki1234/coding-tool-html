@@ -629,6 +629,14 @@ button:hover {
     <button id="saveFileBtn"><i class="fas fa-save"></i> 保存</button>
     <span class="theme-switch" id="themeSwitch"><i class="fas fa-moon"></i> ダークモード</span>
   </div>
+  
+  <!-- サンプルコードボタンの追加 -->
+  <div class="demo-buttons">
+    <button id="demoHtml"><i class="fas fa-code"></i> HTMLサンプル</button>
+    <button id="demoCss"><i class="fas fa-paint-brush"></i> CSSサンプル</button>
+    <button id="demoJs"><i class="fas fa-js"></i> JSサンプル</button>
+  </div>
+  
   <div class="editor-container">
     <div id="fileList">
       <h3>ファイル一覧</h3>
@@ -689,6 +697,199 @@ let dirStack = []; // ディレクトリナビゲーション用のスタック
 
 // サンプルコード - 言語ごとのデモ表示用
 const sampleCodes = {
+  html: `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTMLサンプル</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>HTMLサンプル</h1>
+    <nav>
+      <ul>
+        <li><a href="#home">ホーム</a></li>
+        <li><a href="#about">概要</a></li>
+        <li><a href="#contact">お問い合わせ</a></li>
+      </ul>
+    </nav>
+  </header>
+  
+  <main>
+    <section id="home">
+      <h2>ホームセクション</h2>
+      <p>これはサンプルのHTMLコードです。</p>
+    </section>
+    
+    <section id="about">
+      <h2>概要セクション</h2>
+      <p>このエディタはシンプルなコードエディタです。</p>
+    </section>
+  </main>
+  
+  <footer>
+    <p>&copy; 2025 Simple Web Code Editor</p>
+  </footer>
+  
+  <script src="script.js"></script>
+</body>
+</html>`,
+  css: `/* メインスタイル */
+body {
+  font-family: 'Arial', sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+header {
+  background-color: #e41e3f;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+}
+
+nav ul {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+}
+
+nav li {
+  margin: 0 1rem;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+section {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+h2 {
+  color: #e41e3f;
+  border-bottom: 2px solid #e41e3f;
+  padding-bottom: 0.5rem;
+}
+
+footer {
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 1rem;
+  margin-top: 2rem;
+}`,
+  javascript: `// Simple JavaScript Sample
+
+// DOM要素の取得
+document.addEventListener('DOMContentLoaded', function() {
+  const header = document.querySelector('header');
+  const navLinks = document.querySelectorAll('nav a');
+  const sections = document.querySelectorAll('section');
+  
+  // ナビゲーションのクリックイベント
+  navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // スクロールのスムース化
+      const targetId = this.getAttribute('href');
+      const targetSection = document.querySelector(targetId);
+      
+      if (targetSection) {
+        targetSection.scrollIntoView({
+          behavior: 'smooth'
+        });
+      }
+      
+      // アクティブクラスの切り替え
+      navLinks.forEach(link => link.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+  
+  // スクロールイベント
+  window.addEventListener('scroll', function() {
+    const scrollPosition = window.scrollY;
+    
+    // ヘッダーの背景色変更（スクロール時）
+    if (scrollPosition > 50) {
+      header.style.backgroundColor = '#c41835';
+    } else {
+      header.style.backgroundColor = '#e41e3f';
+    }
+    
+    // 現在見えているセクションに基づいてナビをハイライト
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop;
+      const sectionHeight = section.clientHeight;
+      
+      if (
+        scrollPosition >= sectionTop - 100 && 
+        scrollPosition < sectionTop + sectionHeight - 100
+      ) {
+        const currentId = '#' + section.getAttribute('id');
+        navLinks.forEach(link => {
+          link.classList.remove('active');
+          if (link.getAttribute('href') === currentId) {
+            link.classList.add('active');
+          }
+        });
+      }
+    });
+  });
+  
+  // サンプルデータ
+  const data = {
+    title: 'JavaScriptサンプル',
+    items: ['項目1', '項目2', '項目3'],
+    config: {
+      showItems: true,
+      maxItems: 5
+    }
+  };
+  
+  // コンソールにデータを出力
+  console.log('サンプルデータ:', data);
+});
+
+// ユーティリティ関数
+function debounce(func, wait = 20, immediate = true) {
+  let timeout;
+  return function() {
+    const context = this, args = arguments;
+    const later = function() {
+      timeout = null;
+      if (!immediate) func.apply(context, args);
+    };
+    const callNow = immediate && !timeout;
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+    if (callNow) func.apply(context, args);
+  };
+}`
 }
 
 window.addEventListener('load', () => {
@@ -848,6 +1049,65 @@ function toggleTheme() {
   }
 }
 
+// ファイルのアイコンを取得する関数
+function getFileIcon(fileName) {
+  const ext = fileName.split('.').pop().toLowerCase();
+  switch (ext) {
+    case 'html':
+    case 'htm':
+      return 'fas fa-code';
+    case 'css':
+      return 'fab fa-css3-alt';
+    case 'js':
+      return 'fab fa-js';
+    case 'json':
+      return 'fas fa-brackets-curly';
+    case 'md':
+      return 'fab fa-markdown';
+    case 'txt':
+      return 'fas fa-file-alt';
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+    case 'gif':
+    case 'webp':
+    case 'svg':
+      return 'fas fa-image';
+    case 'pdf':
+      return 'fas fa-file-pdf';
+    case 'zip':
+    case 'rar':
+    case '7z':
+      return 'fas fa-file-archive';
+    case 'mp3':
+    case 'wav':
+    case 'ogg':
+      return 'fas fa-file-audio';
+    case 'mp4':
+    case 'mov':
+    case 'webm':
+      return 'fas fa-file-video';
+    case 'php':
+      return 'fab fa-php';
+    case 'py':
+      return 'fab fa-python';
+    default:
+      return 'fas fa-file';
+  }
+}
+
+// ファイル名をフォーマットする関数
+function formatFileName(fileName) {
+  const ext = fileName.split('.').pop().toLowerCase();
+  const baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+  
+  if (!ext || fileName === ext) {
+    return fileName;
+  }
+  
+  return `<span class="file-name">${baseName}</span><span class="file-extension ext-${ext}">${ext}</span>`;
+}
+
 // Open directory and read contents
 async function openDirectory() {
   try {
@@ -998,49 +1258,141 @@ async function buildDirectoryTree(dirHandle, parentElement = null) {
   // もしエントリがない場合
   if (directories.length === 0 && files.length === 0) {
     const emptyItem = document.createElement('li');
-    emptyItem.textContent = '空のフォルダ';
-    emptyItem.style.color = '#999';
+    emptyItem.textContent = '空のディレクトリ';
     emptyItem.style.fontStyle = 'italic';
+    emptyItem.style.color = '#999';
     emptyItem.style.padding = '4px 8px';
     treeRoot.appendChild(emptyItem);
   }
 }
 
-// 親ディレクトリへの移動
+// 親ディレクトリへ移動
 async function navigateToParentDirectory() {
-  // スタックからディレクトリを取得
-  if (dirStack.length > 0) {
-    const prevDir = dirStack.pop();
-    directoryHandle = prevDir.handle;
-    document.getElementById('currentDirName').textContent = prevDir.name;
-    currentDirPath = prevDir.path;
-    document.getElementById('currentDirPath').textContent = currentDirPath;
+  if (parentDirectoryHandle || dirStack.length > 0) {
+    if (dirStack.length > 0) {
+      // スタックから親ディレクトリを取得
+      const parentDir = dirStack.pop();
+      directoryHandle = parentDir.handle;
+      parentDirectoryHandle = dirStack.length > 0 ? dirStack[dirStack.length - 1].handle : null;
+      
+      // パスと名前を更新
+      document.getElementById('currentDirName').textContent = parentDir.name;
+      currentDirPath = parentDir.path;
+      document.getElementById('currentDirPath').textContent = currentDirPath;
+    } else if (parentDirectoryHandle) {
+      // 直接の親ディレクトリがある場合
+      directoryHandle = parentDirectoryHandle;
+      parentDirectoryHandle = null;
+      
+      // パスを更新
+      const lastSlashIndex = currentDirPath.lastIndexOf('/');
+      if (lastSlashIndex > 0) {
+        currentDirPath = currentDirPath.substring(0, lastSlashIndex);
+      } else {
+        currentDirPath = '/';
+      }
+      
+      document.getElementById('currentDirName').textContent = directoryHandle.name;
+      document.getElementById('currentDirPath').textContent = currentDirPath;
+    }
     
-    // 親ディレクトリの内容を表示
+    // ディレクトリの内容を表示
     await buildDirectoryTree(directoryHandle);
-  } else if (parentDirectoryHandle) {
-    // スタックが空で親ディレクトリがある場合
-    const currentName = directoryHandle.name;
-    directoryHandle = parentDirectoryHandle;
-    parentDirectoryHandle = null; // 最上位に戻る
+  }
+}
+
+// ファイルの読み込み
+async function loadFile(fileHandle) {
+  try {
+    currentFileHandle = fileHandle;
+    const file = await fileHandle.getFile();
+    const contents = await file.text();
     
-    // パスを更新
-    const pathParts = currentDirPath.split('/');
-    pathParts.pop(); // 最後の部分（現在のフォルダ名）を削除
-    currentDirPath = pathParts.join('/') || '/';
+    // エディタに表示
+    editorInstance.setValue(contents);
     
-    document.getElementById('currentDirName').textContent = directoryHandle.name;
-    document.getElementById('currentDirPath').textContent = currentDirPath;
+    // ファイル拡張子に応じてモードを設定
+    const fileName = fileHandle.name;
+    const ext = fileName.split('.').pop().toLowerCase();
     
-    // 親ディレクトリの内容を表示
+    let mode = 'text/plain';
+    if (ext === 'html' || ext === 'htm') {
+      mode = 'htmlmixed';
+    } else if (ext === 'css') {
+      mode = 'css';
+    } else if (ext === 'js') {
+      mode = 'javascript';
+    } else if (ext === 'json') {
+      mode = 'application/json';
+    } else if (ext === 'md') {
+      mode = 'markdown';
+    } else if (ext === 'php') {
+      mode = 'application/x-httpd-php';
+    } else if (ext === 'py') {
+      mode = 'python';
+    }
+    
+    editorInstance.setOption('mode', mode);
+    editorInstance.refresh();
+  } catch (err) {
+    console.error('ファイルの読み込みに失敗:', err);
+    alert('ファイルの読み込みに失敗しました: ' + err.message);
+  }
+}
+
+// 現在のファイルを保存
+async function saveCurrentFile() {
+  if (!currentFileHandle) {
+    alert('保存するファイルが選択されていません。');
+    return;
+  }
+  
+  try {
+    // ファイルに書き込むためのWritableStreamを取得
+    const writable = await currentFileHandle.createWritable();
+    // エディタの内容を取得して書き込み
+    const contents = editorInstance.getValue();
+    await writable.write(contents);
+    await writable.close();
+    
+    alert('ファイルを保存しました。');
+  } catch (err) {
+    console.error('ファイルの保存に失敗:', err);
+    alert('ファイルの保存に失敗しました: ' + err.message);
+  }
+}
+
+// 新規ファイル作成
+async function createNewFile() {
+  if (!directoryHandle) {
+    alert('まずフォルダを開いてください。');
+    return;
+  }
+  
+  const fileName = prompt('新しいファイル名を入力してください:');
+  if (!fileName) return;
+  
+  try {
+    // 新しいファイルを作成
+    const fileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write('');
+    await writable.close();
+    
+    // ディレクトリの内容を再表示
     await buildDirectoryTree(directoryHandle);
+    
+    alert(`ファイル "${fileName}" を作成しました。`);
+  } catch (err) {
+    console.error('新規ファイル作成に失敗:', err);
+    alert('新規ファイル作成に失敗しました: ' + err.message);
   }
 }
 
 // ディレクトリ作成モーダルを表示
 function showCreateDirModal() {
   if (!directoryHandle) {
-    alert('先にフォルダを開いてください。');
+    alert('まずフォルダを開いてください。');
     return;
   }
   
@@ -1048,128 +1400,36 @@ function showCreateDirModal() {
   document.getElementById('createDirModal').style.display = 'block';
 }
 
-// ディレクトリ作成モーダルを非表示
+// ディレクトリ作成モーダルを閉じる
 function hideCreateDirModal() {
   document.getElementById('createDirModal').style.display = 'none';
 }
 
-// 新しいディレクトリを作成
+// 新規ディレクトリ作成
 async function createNewDirectory() {
-  if (!directoryHandle) {
-    alert('先にフォルダを開いてください。');
-    hideCreateDirModal();
-    return;
-  }
-  
   const dirName = document.getElementById('dirName').value.trim();
+  
   if (!dirName) {
-    alert('フォルダ名を入力してください。');
+    alert('ディレクトリ名を入力してください。');
     return;
   }
   
   try {
-    // ディレクトリを作成
-    const newDirHandle = await directoryHandle.getDirectoryHandle(dirName, { create: true });
+    // 新しいディレクトリを作成
+    await directoryHandle.getDirectoryHandle(dirName, { create: true });
+    
+    // モーダルを閉じる
     hideCreateDirModal();
     
-    // ツリービューを更新
+    // ディレクトリの内容を再表示
     await buildDirectoryTree(directoryHandle);
     
-    // 成功メッセージ
-    alert(`フォルダ「${dirName}」を作成しました。`);
-  } catch (error) {
-    console.error('ディレクトリ作成エラー:', error);
-    alert(`フォルダの作成に失敗しました: ${error.message}`);
-  }
-}
-
-// Load file content into the editor
-async function loadFile(fileHandle) {
-  currentFileHandle = fileHandle;
-  try {
-    const fileData = await fileHandle.getFile();
-    const text = await fileData.text();
-    
-    // Fix: Set the value without adding extra line breaks
-    editorInstance.setValue(text);
-    editorInstance.setOption('mode', getModeByFilename(fileHandle.name));
-    
-    // Ensure proper refresh
-    editorInstance.refresh();
+    alert(`ディレクトリ "${dirName}" を作成しました。`);
   } catch (err) {
-    console.error('ファイル読み込みに失敗:', err);
+    console.error('ディレクトリ作成エラー:', err);
+    alert('ディレクトリの作成に失敗しました: ' + err.message);
   }
 }
-
-// Determine editor mode by file extension
-function getModeByFilename(filename) {
-  const ext = filename.split('.').pop().toLowerCase();
-  if (ext === 'html' || ext === 'htm') return 'htmlmixed';
-  if (ext === 'js') return 'javascript';
-  if (ext === 'css') return 'css';
-  if (ext === 'json') return 'application/json';
-  if (ext === 'md') return 'markdown';
-  if (ext === 'php') return 'php';
-  if (ext === 'py') return 'python';
-  // Fallback
-  return 'text/plain';
-}
-
-// Save current file (confirmation required)
-async function saveCurrentFile() {
-  if (!currentFileHandle) {
-    alert('読み込まれたファイルがありません。');
-    return;
-  }
-
-  const confirmSave = confirm('現在のファイルを上書き保存しますか？');
-  if (!confirmSave) return;
-
-  try {
-    const writable = await currentFileHandle.createWritable();
-    await writable.write(editorInstance.getValue());
-    await writable.close();
-    alert('保存が完了しました。');
-  } catch (err) {
-    console.error('保存に失敗:', err);
-  }
-}
-
-// Create a new file in the opened directory
-async function createNewFile() {
-  if (!directoryHandle) {
-    alert('先にフォルダを開いてください。');
-    return;
-  }
-  const fileName = prompt('新しいファイル名を入力してください (例: newfile.html)');
-  if (!fileName) return;
-
-  try {
-    // File System Access API (origin trial)
-    // In some browsers, you can create a file this way:
-    const newFileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
-    currentFileHandle = newFileHandle;
-    editorInstance.setValue('');
-    editorInstance.setOption('mode', getModeByFilename(fileName));
-    
-    // ツリービューを更新
-    await buildDirectoryTree(directoryHandle);
-    
-    // 作成したファイルを見つけてアクティブにする
-    const fileItems = document.querySelectorAll('.tree-file');
-    for (const item of fileItems) {
-      if (item.textContent.includes(fileName)) {
-        // 他のファイルのアクティブ状態を解除
-        fileItems.forEach(f => f.classList.remove('active'));
-        // このファイルをアクティブに
-        item.classList.add('active');
-        break;
-      }
-    }
-  } catch (err) {
-    console.error('新規ファイル作成に失敗:', err);
-  }
-}
- 	</script>
+  </script>
 </body>
 </html>
