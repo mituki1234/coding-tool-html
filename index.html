@@ -4,12 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>コードエディター with プレビュー</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Noto+Sans+JP:wght@400;500;700&display=swap">
     <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --sidebar-bg: #252526;
+            --editor-bg: #1e1e1e;
+            --tab-bg: #2d2d2d;
+            --tab-active-bg: #1e1e1e;
+            --tab-border: #252526;
+            --text-color: #d4d4d4;
+            --text-secondary: #a0a0a0;
+            --accent-color: #0078d4;
+            --border-color: #3e3e42;
+            --button-bg: #0078d4;
+            --button-hover: #106ebe;
+            --button-secondary-bg: #3a3a3a;
+            --button-secondary-hover: #505050;
+            --tree-item-hover: #37373d;
+            --tree-item-active: #094771;
+            --border-radius: 8px;
+            --border-radius-sm: 4px;
+            --shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+            
+            /* 言語ごとのカラー */
+            --html-color: #e44d26;
+            --css-color: #42a5f5;
+            --js-color: #f7df1e;
+            --json-color: #7cae3b;
+            --md-color: #51a7f9;
+            --default-color: #a0a0a0;
+            
+            /* シンタックスハイライト用の色（3色に限定） */
+            --syntax-red: #ff4d4f;
+            --syntax-blue: #1890ff;
+            --syntax-yellow: #fadb14;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Noto Sans JP', sans-serif;
             margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
+            padding: 16px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
         }
 
         .container {
@@ -20,29 +62,38 @@
             margin: 0 auto;
         }
 
+        h1 {
+            margin-top: 0;
+            font-weight: 400;
+            color: var(--text-color);
+            padding: 0 16px;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
         .main-content {
             display: flex;
-            gap: 20px;
+            gap: 16px;
+            height: calc(100vh - 120px);
         }
 
         .file-sidebar {
-            width: 250px;
-            background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 15px;
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            max-height: 700px;
+            height: 100%;
         }
 
         .directory-tree {
             flex: 1;
             overflow-y: auto;
-            margin-top: 10px;
-            border: 1px solid #eee;
-            border-radius: 5px;
-            padding: 10px;
+            margin-top: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            padding: 8px;
         }
 
         .tree-item {
@@ -50,10 +101,12 @@
             cursor: pointer;
             display: flex;
             align-items: center;
+            padding: 6px 8px;
+            border-radius: var(--border-radius-sm);
         }
 
         .tree-item.directory {
-            font-weight: bold;
+            font-weight: 500;
         }
 
         .tree-item.file {
@@ -61,17 +114,18 @@
         }
 
         .tree-item:hover {
-            background-color: #f5f5f5;
+            background-color: var(--tree-item-hover);
         }
 
         .tree-item.active {
-            background-color: #e0e7ff;
-            border-radius: 3px;
+            background-color: var(--tree-item-active);
+            border-radius: var(--border-radius-sm);
         }
 
         .tree-toggle {
             cursor: pointer;
             margin-right: 5px;
+            color: var(--text-secondary);
         }
 
         .tree-children {
@@ -85,101 +139,151 @@
 
         .editor-container {
             flex: 1;
-            background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            background-color: var(--editor-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 8px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
         .editor-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding: 8px 8px 8px 4px;
         }
 
         .file-tabs {
             display: flex;
-            gap: 5px;
+            gap: 1px;
             flex-wrap: wrap;
             max-width: 70%;
+            position: relative;
+            margin-bottom: -1px;
         }
 
         .file-tab {
-            padding: 8px 15px;
-            background-color: #f0f0f0;
-            border-radius: 5px 5px 0 0;
+            padding: 8px 16px;
+            background-color: var(--tab-bg);
+            border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
             cursor: pointer;
-            border: 1px solid #ddd;
-            border-bottom: none;
             position: relative;
-            max-width: 150px;
+            max-width: 160px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            font-size: 13px;
+            transition: background-color 0.2s ease;
+            border-right: 1px solid var(--tab-border);
         }
 
         .file-tab.active {
-            background-color: #fff;
-            border-bottom: 2px solid #4285f4;
+            background-color: var(--tab-active-bg);
+            border-bottom: 2px solid;
+        }
+
+        /* 各ファイルタイプごとの色分け */
+        .file-tab[data-type="html"] {
+            border-bottom-color: var(--syntax-red);
+        }
+        
+        .file-tab[data-type="css"] {
+            border-bottom-color: var(--syntax-blue);
+        }
+        
+        .file-tab[data-type="js"] {
+            border-bottom-color: var(--syntax-yellow);
+        }
+        
+        .file-tab[data-type="json"] {
+            border-bottom-color: var(--syntax-yellow);
+        }
+        
+        .file-tab[data-type="md"] {
+            border-bottom-color: var(--syntax-blue);
+        }
+        
+        .file-tab:not([data-type="html"]):not([data-type="css"]):not([data-type="js"]):not([data-type="json"]):not([data-type="md"]) {
+            border-bottom-color: var(--default-color);
+        }
+
+        /* ファイル名の拡張子部分のカラー */
+        .file-extension {
+            opacity: 0.6;
         }
 
         .file-tab .close-tab {
             position: absolute;
             right: 5px;
-            top: 5px;
+            top: 50%;
+            transform: translateY(-50%);
             font-size: 12px;
             opacity: 0.7;
             cursor: pointer;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
         }
 
         .file-tab .close-tab:hover {
             opacity: 1;
+            background-color: var(--tree-item-hover);
         }
 
         .editor-buttons {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         button {
-            padding: 8px 15px;
-            background-color: #4285f4;
+            padding: 8px 16px;
+            background-color: var(--button-bg);
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: var(--border-radius-sm);
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.2s ease;
+            font-size: 13px;
+            font-family: 'Noto Sans JP', sans-serif;
         }
 
         button:hover {
-            background-color: #3367d6;
+            background-color: var(--button-hover);
         }
 
         button.secondary {
-            background-color: #f1f1f1;
-            color: #333;
+            background-color: var(--button-secondary-bg);
+            color: var(--text-color);
         }
 
         button.secondary:hover {
-            background-color: #e0e0e0;
+            background-color: var(--button-secondary-hover);
         }
 
         textarea {
             width: 100%;
-            height: 400px;
-            padding: 15px;
-            font-family: 'Consolas', monospace;
+            height: 100%;
+            padding: 16px;
+            font-family: 'Fira Code', monospace;
             font-size: 14px;
-            line-height: 1.5;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            resize: vertical;
+            line-height: 1.6;
+            border: none;
+            border-radius: var(--border-radius-sm);
+            resize: none;
             tab-size: 4;
+            color: var(--text-color);
+            background-color: var(--editor-bg);
+            outline: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
 
         .popup-overlay {
@@ -188,43 +292,56 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.7);
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            backdrop-filter: blur(3px);
         }
 
         .preview-popup {
-            background-color: white;
-            border-radius: 5px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
             width: 90%;
             height: 90%;
             display: flex;
             flex-direction: column;
             position: relative;
+            overflow: hidden;
         }
 
         .popup-header {
-            padding: 15px;
-            border-bottom: 1px solid #eee;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background-color: var(--sidebar-bg);
         }
 
         .preview-controls {
             display: flex;
-            gap: 10px;
+            gap: 16px;
             align-items: center;
         }
 
+        .preview-controls h2 {
+            margin: 0;
+            font-weight: 400;
+            font-size: 16px;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
         .device-selector {
-            padding: 5px 10px;
-            border-radius: 4px;
-            border: 1px solid #ddd;
-            background-color: white;
+            padding: 6px 12px;
+            border-radius: var(--border-radius-sm);
+            border: 1px solid var(--border-color);
+            background-color: var(--button-secondary-bg);
+            color: var(--text-color);
+            font-size: 13px;
+            font-family: 'Noto Sans JP', sans-serif;
         }
 
         .close-popup {
@@ -232,7 +349,17 @@
             border: none;
             font-size: 20px;
             cursor: pointer;
-            color: #333;
+            color: var(--text-color);
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-popup:hover {
+            background-color: var(--tree-item-hover);
         }
 
         .preview-container {
@@ -240,29 +367,45 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            background-color: #f9f9f9;
+            padding: 24px;
+            background-color: var(--bg-color);
             overflow: auto;
         }
 
         #preview-frame {
             border: none;
             transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
             background-color: white;
+            border-radius: var(--border-radius-sm);
         }
 
         .file-input {
             display: flex;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 8px;
+            background-color: var(--sidebar-bg);
+            border-radius: var(--border-radius-sm);
         }
 
         .file-input input {
             flex: 1;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            background-color: var(--editor-bg);
+            color: var(--text-color);
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+
+        .file-input select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            background-color: var(--editor-bg);
+            color: var(--text-color);
+            font-family: 'Noto Sans JP', sans-serif;
         }
 
         .file-input button {
@@ -274,23 +417,25 @@
         }
 
         .file-manager {
-            margin-top: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
+            margin-top: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-sm);
+            padding: 12px;
+            background-color: var(--sidebar-bg);
         }
 
         .file-list {
-            margin-top: 10px;
+            margin-top: 12px;
             max-height: 150px;
             overflow-y: auto;
+            border-radius: var(--border-radius-sm);
         }
 
         .file-item {
             display: flex;
             justify-content: space-between;
-            padding: 5px;
-            border-bottom: 1px solid #eee;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border-color);
         }
 
         .file-item:last-child {
@@ -299,17 +444,17 @@
 
         .file-actions {
             display: flex;
-            gap: 5px;
+            gap: 8px;
         }
 
         .file-actions button {
-            padding: 2px 5px;
+            padding: 2px 8px;
             font-size: 12px;
         }
 
         /* アイコン表示用 */
         .file-icon {
-            margin-right: 5px;
+            margin-right: 8px;
             width: 16px;
             height: 16px;
             display: inline-block;
@@ -336,22 +481,125 @@
         }
 
         .bottom-bar {
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #f1f1f1;
-            border-radius: 5px;
+            margin-top: auto;
+            padding: 8px 12px;
+            background-color: var(--sidebar-bg);
+            border-radius: var(--border-radius-sm);
             font-size: 12px;
-            color: #555;
+            color: var(--text-secondary);
+            font-family: 'Noto Sans JP', sans-serif;
         }
 
         .import-controls {
             display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        /* カスタムスクロールバー */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--editor-bg);
+            border-radius: var(--border-radius-sm);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--button-secondary-bg);
+            border-radius: var(--border-radius-sm);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--button-secondary-hover);
+        }
+
+        /* エディタのコンテンツエリア */
+        .editor-content {
+            flex: 1;
+            position: relative;
+            border-radius: var(--border-radius-sm);
+            overflow: hidden;
+        }
+
+        /* コードのシンタックスハイライト */
+        .syntax-highlight {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 16px;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: transparent;
+            tab-size: 4;
+            white-space: pre-wrap;
+            overflow: auto;
+            pointer-events: none;
+            z-index: 0;
+            background-color: var(--editor-bg);
+        }
+
+        /* 赤・青・黄の3色に限定したシンタックスハイライト */
+        /* HTML構文 */
+        .html-tag {
+            color: var(--syntax-blue);
+        }
+        .html-attr {
+            color: var(--syntax-yellow);
+        }
+        .html-string {
+            color: var(--syntax-red);
+        }
+
+        /* CSS構文 */
+        .css-property {
+            color: var(--syntax-blue);
+        }
+        .css-value {
+            color: var(--syntax-red);
+        }
+        .css-selector {
+            color: var(--syntax-yellow);
+        }
+
+        /* JS構文 */
+        .js-keyword {
+            color: var(--syntax-blue);
+        }
+        .js-string {
+            color: var(--syntax-red);
+        }
+        .js-number {
+            color: var(--syntax-yellow);
+        }
+
+        /* コメントは削除（色付きのみ表示） */
+        .html-comment, .css-comment, .js-comment {
+            display: none;
+        }
+
+        /* 日付・ユーザー情報エリア */
+        .user-info {
+            position: absolute;
+            top: 4px;
+            right: 16px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-family: 'Noto Sans JP', sans-serif;
         }
     </style>
 </head>
 <body>
+    <div class="user-info">
+        <div>日時: 2025-04-11 23:31:31 (UTC)</div>
+        <div>ユーザー: mituki1234</div>
+    </div>
+    
     <div class="container">
         <h1>コードエディター with プレビュー</h1>
         
@@ -388,9 +636,9 @@
             <div class="editor-container">
                 <div class="editor-header">
                     <div class="file-tabs" id="file-tabs">
-                        <div class="file-tab active" data-file="index.html">HTML</div>
-                        <div class="file-tab" data-file="style.css">CSS</div>
-                        <div class="file-tab" data-file="script.js">JavaScript</div>
+                        <div class="file-tab active" data-file="index.html" data-type="html">index<span class="file-extension">.html</span></div>
+                        <div class="file-tab" data-file="style.css" data-type="css">style<span class="file-extension">.css</span></div>
+                        <div class="file-tab" data-file="script.js" data-type="js">script<span class="file-extension">.js</span></div>
                     </div>
                     
                     <div class="editor-buttons">
@@ -410,10 +658,19 @@
                     <button id="cancel-file-btn" class="secondary">キャンセル</button>
                 </div>
                 
-                <textarea id="html-editor" placeholder="HTMLを入力してください"></textarea>
-                <textarea id="css-editor" class="hidden" placeholder="CSSを入力してください"></textarea>
-                <textarea id="js-editor" class="hidden" placeholder="JavaScriptを入力してください"></textarea>
-                <textarea id="custom-editor" class="hidden" placeholder="コードを入力してください"></textarea>
+                <div class="editor-content">
+                    <div id="html-highlight" class="syntax-highlight"></div>
+                    <textarea id="html-editor" placeholder="HTMLを入力してください"></textarea>
+                    
+                    <div id="css-highlight" class="syntax-highlight hidden"></div>
+                    <textarea id="css-editor" class="hidden" placeholder="CSSを入力してください"></textarea>
+                    
+                    <div id="js-highlight" class="syntax-highlight hidden"></div>
+                    <textarea id="js-editor" class="hidden" placeholder="JavaScriptを入力してください"></textarea>
+                    
+                    <div id="custom-highlight" class="syntax-highlight hidden"></div>
+                    <textarea id="custom-editor" class="hidden" placeholder="コードを入力してください"></textarea>
+                </div>
                 
                 <div class="bottom-bar">
                     <span id="current-file">現在編集中: index.html</span>
@@ -452,12 +709,17 @@
         const customFiles = {};
         let currentEditingFile = 'index.html';
         let activeEditor = 'html-editor';
+        let isDirectoryImported = false;
         
         // DOM要素
         const htmlEditor = document.getElementById('html-editor');
         const cssEditor = document.getElementById('css-editor');
         const jsEditor = document.getElementById('js-editor');
         const customEditor = document.getElementById('custom-editor');
+        const htmlHighlight = document.getElementById('html-highlight');
+        const cssHighlight = document.getElementById('css-highlight');
+        const jsHighlight = document.getElementById('js-highlight');
+        const customHighlight = document.getElementById('custom-highlight');
         const fileTabs = document.querySelectorAll('.file-tab');
         const fileTabsContainer = document.getElementById('file-tabs');
         const previewBtn = document.getElementById('preview-btn');
@@ -478,13 +740,142 @@
         const dirInput = document.getElementById('dir-input');
         
         // 初期設定
-        htmlEditor.value = '<!DOCTYPE html>\n<html>\n<head>\n  <title>マイページ</title>\n  <link rel="stylesheet" href="style.css">\n  <script src="script.js"><\/script>\n</head>\n<body>\n  <h1>こんにちは、世界！</h1>\n  <p>ここにコンテンツが入ります。</p>\n</body>\n</html>';
+        htmlEditor.value = '<!DOCTYPE html>\n<html>\n<head>\n  <title>マイページ</title>\n  <link rel="stylesheet" href="style.css">\n  <script src="script.js"><\/script>\n</head>\n<body>\n  <h1>ようこそ！</h1>\n  <p>これは簡単なHTMLページです。</p>\n  <div class="container">\n    <button id="myButton">クリックしてね</button>\n  </div>\n</body>\n</html>';
         cssEditor.value = 'body {\n  font-family: Arial, sans-serif;\n  margin: 20px;\n  background-color: #f0f0f0;\n}\n\nh1 {\n  color: #333;\n  text-align: center;\n}';
         jsEditor.value = 'document.addEventListener("DOMContentLoaded", function() {\n  console.log("ページが読み込まれました！");\n});';
         
         files['index.html'] = htmlEditor.value;
         files['style.css'] = cssEditor.value;
         files['script.js'] = jsEditor.value;
+        
+        // シンタックスハイライトを更新
+        updateHighlight('html', htmlEditor.value);
+        updateHighlight('css', cssEditor.value);
+        updateHighlight('js', jsEditor.value);
+        
+        // ファイル拡張子に基づくタイプを取得する関数
+        function getFileType(fileName) {
+            const ext = fileName.split('.').pop().toLowerCase();
+            return ext;
+        }
+        
+        // ファイル名を拡張子とベース名に分割して表示する関数
+        function formatFileNameForTab(fileName) {
+            const parts = fileName.split('.');
+            const ext = parts.pop();
+            const baseName = parts.join('.');
+            return `${baseName}<span class="file-extension">.${ext}</span>`;
+        }
+        
+        // HTML構文のシンタックスハイライト（赤・青・黄の3色のみ）
+        function highlightHTML(code) {
+            // タグ、属性、文字列のみをハイライト
+            return code
+                .replace(/(&lt;\/?[a-zA-Z0-9-]+)/g, '<span class="html-tag">$1</span>')
+                .replace(/([a-zA-Z0-9-]+)=(&quot;|&apos;)/g, '<span class="html-attr">$1</span>=<span class="html-string">$2</span>')
+                .replace(/(&quot;.*?&quot;|&apos;.*?&apos;)/g, '<span class="html-string">$1</span>');
+        }
+        
+        // CSS構文のシンタックスハイライト（赤・青・黄の3色のみ）
+        function highlightCSS(code) {
+            // プロパティ、値、セレクターのみをハイライト
+            return code
+                .replace(/([a-zA-Z-]+:)/g, '<span class="css-property">$1</span>')
+                .replace(/(:[^;]+)/g, function(match) {
+                    return match.replace(/([^:]+)/g, '<span class="css-value">$1</span>');
+                })
+                .replace(/([.#]?[a-zA-Z0-9-_]+)(?=\s*\{)/g, '<span class="css-selector">$1</span>');
+        }
+        
+        // JavaScript構文のシンタックスハイライト（赤・青・黄の3色のみ）
+        function highlightJS(code) {
+            // キーワード、文字列、数値のみをハイライト
+            const keywords = ['var', 'let', 'const', 'function', 'return', 'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'break', 'continue', 'new', 'this', 'typeof'];
+            let highlightedCode = code
+                .replace(/(".*?"|'.*?'|`[\s\S]*?`)/g, '<span class="js-string">$1</span>')
+                .replace(/\b(\d+(\.\d+)?)\b/g, '<span class="js-number">$1</span>');
+            
+            // キーワードをハイライト
+            keywords.forEach(keyword => {
+                const re = new RegExp('\\b(' + keyword + ')\\b', 'g');
+                highlightedCode = highlightedCode.replace(re, '<span class="js-keyword">$1</span>');
+            });
+            
+            return highlightedCode;
+        }
+        
+        // シンタックスハイライトの更新関数
+        function updateHighlight(type, code) {
+            let highlightElement;
+            let highlightedCode = escapeHTML(code);
+            
+            switch(type) {
+                case 'html':
+                    highlightElement = htmlHighlight;
+                    highlightedCode = highlightHTML(highlightedCode);
+                    break;
+                case 'css':
+                    highlightElement = cssHighlight;
+                    highlightedCode = highlightCSS(highlightedCode);
+                    break;
+                case 'js':
+                    highlightElement = jsHighlight;
+                    highlightedCode = highlightJS(highlightedCode);
+                    break;
+                default:
+                    // カスタムエディタの場合は拡張子に基づいて適切なハイライトを適用
+                    highlightElement = customHighlight;
+                    const fileExt = currentEditingFile.split('.').pop().toLowerCase();
+                    if (fileExt === 'html') {
+                        highlightedCode = highlightHTML(highlightedCode);
+                    } else if (fileExt === 'css') {
+                        highlightedCode = highlightCSS(highlightedCode);
+                    } else if (fileExt === 'js') {
+                        highlightedCode = highlightJS(highlightedCode);
+                    }
+                    break;
+            }
+            
+            if (highlightElement) {
+                highlightElement.innerHTML = highlightedCode;
+                highlightElement.scrollTop = highlightElement.parentElement.querySelector('textarea').scrollTop;
+            }
+        }
+        
+        // HTML特殊文字のエスケープ
+        function escapeHTML(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&apos;");
+        }
+        
+        // スクロールの同期
+        [htmlEditor, cssEditor, jsEditor, customEditor].forEach(editor => {
+            editor.addEventListener('scroll', function() {
+                const highlightDiv = this.previousElementSibling;
+                if (highlightDiv) {
+                    highlightDiv.scrollTop = this.scrollTop;
+                    highlightDiv.scrollLeft = this.scrollLeft;
+                }
+            });
+            
+            // 入力時にハイライトを更新
+            editor.addEventListener('input', function() {
+                if (editor === htmlEditor) {
+                    updateHighlight('html', editor.value);
+                } else if (editor === cssEditor) {
+                    updateHighlight('css', editor.value);
+                } else if (editor === jsEditor) {
+                    updateHighlight('js', editor.value);
+                } else if (editor === customEditor) {
+                    updateHighlight('custom', editor.value);
+                }
+                saveCurrentFile();
+            });
+        });
         
         // ディレクトリツリーのトグル
         document.querySelectorAll('.tree-toggle').forEach(toggle => {
@@ -503,24 +894,32 @@
         document.querySelector('.tree-toggle').click();
         
         // ファイルツリーからファイルを選択
-        document.querySelectorAll('.tree-item.file').forEach(item => {
-            item.addEventListener('click', () => {
-                const filePath = item.getAttribute('data-file');
-                openFile(filePath);
-                
-                // ツリーアイテムのアクティブ状態を更新
-                document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('active'));
-                item.classList.add('active');
+        function setupFileTreeListeners() {
+            document.querySelectorAll('.tree-item.file').forEach(item => {
+                item.addEventListener('click', () => {
+                    const filePath = item.getAttribute('data-file');
+                    openFile(filePath);
+                    
+                    // ツリーアイテムのアクティブ状態を更新
+                    document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                });
             });
-        });
+        }
+        
+        setupFileTreeListeners();
         
         // ファイルタブの切り替え
-        fileTabs.forEach(tab => {
-            tab.addEventListener('click', () => {
-                const filePath = tab.getAttribute('data-file');
-                openFile(filePath);
+        function setupTabListeners() {
+            document.querySelectorAll('.file-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const filePath = tab.getAttribute('data-file');
+                    openFile(filePath);
+                });
             });
-        });
+        }
+        
+        setupTabListeners();
         
         // ファイルを開く関数
         function openFile(filePath) {
@@ -541,34 +940,55 @@
                 tabToActivate.classList.add('active');
             }
             
-            // エディターを切り替え
-            htmlEditor.classList.add('hidden');
-            cssEditor.classList.add('hidden');
-            jsEditor.classList.add('hidden');
-            customEditor.classList.add('hidden');
+            // エディターを切り替える前にすべてのエディタとハイライト要素を非表示にする
+            document.querySelectorAll('.syntax-highlight').forEach(h => h.classList.add('hidden'));
+            document.querySelectorAll('textarea').forEach(t => t.classList.add('hidden'));
             
             // ファイルの拡張子で判断
             const fileExt = filePath.split('.').pop().toLowerCase();
             let editorToShow;
+            let highlightToShow;
             
-            if (filePath === 'index.html') {
+            if (filePath === 'index.html' && !isDirectoryImported) {
                 editorToShow = htmlEditor;
+                highlightToShow = htmlHighlight;
                 activeEditor = 'html-editor';
-            } else if (filePath === 'style.css') {
+                updateHighlight('html', htmlEditor.value);
+            } else if (filePath === 'style.css' && !isDirectoryImported) {
                 editorToShow = cssEditor;
+                highlightToShow = cssHighlight;
                 activeEditor = 'css-editor';
-            } else if (filePath === 'script.js') {
+                updateHighlight('css', cssEditor.value);
+            } else if (filePath === 'script.js' && !isDirectoryImported) {
                 editorToShow = jsEditor;
+                highlightToShow = jsHighlight;
                 activeEditor = 'js-editor';
+                updateHighlight('js', jsEditor.value);
             } else {
+                // インポートされたファイルまたはカスタムファイル
                 editorToShow = customEditor;
+                highlightToShow = customHighlight;
                 activeEditor = 'custom-editor';
                 
-                // カスタムファイルの内容をロード
-                customEditor.value = customFiles[filePath] || '';
+                // このファイルが基本ファイルと同名だがインポートされたものなら、インポートされた内容を使用
+                if (isDirectoryImported && (filePath === 'index.html' || filePath === 'style.css' || filePath === 'script.js')) {
+                    customEditor.value = customFiles[filePath] || '';
+                } else {
+                    // その他のカスタムファイルの内容をロード
+                    customEditor.value = customFiles[filePath] || '';
+                }
+                
+                updateHighlight('custom', customEditor.value);
             }
             
-            editorToShow.classList.remove('hidden');
+            if (editorToShow) {
+                editorToShow.classList.remove('hidden');
+            }
+            
+            if (highlightToShow) {
+                highlightToShow.classList.remove('hidden');
+            }
+            
             currentEditingFile = filePath;
             
             // 現在編集中のファイル表示を更新
@@ -577,28 +997,39 @@
         
         // 現在のファイルを保存
         function saveCurrentFile() {
-            if (currentEditingFile === 'index.html') {
+            if (!isDirectoryImported && currentEditingFile === 'index.html') {
                 files['index.html'] = htmlEditor.value;
-            } else if (currentEditingFile === 'style.css') {
+            } else if (!isDirectoryImported && currentEditingFile === 'style.css') {
                 files['style.css'] = cssEditor.value;
-            } else if (currentEditingFile === 'script.js') {
+            } else if (!isDirectoryImported && currentEditingFile === 'script.js') {
                 files['script.js'] = jsEditor.value;
-            } else if (customFiles[currentEditingFile] !== undefined) {
-                customFiles[currentEditingFile] = customEditor.value;
+            } else {
+                // ディレクトリインポート後またはカスタムファイルの場合
+                customFiles[currentEditingFile] = activeEditor === 'custom-editor' ? 
+                    customEditor.value : 
+                    document.getElementById(activeEditor).value;
             }
         }
         
         // ファイルタブを追加
         function addFileTab(filePath) {
+            // 既存のタブがあれば返す
+            const existingTab = document.querySelector(`.file-tab[data-file="${filePath}"]`);
+            if (existingTab) return;
+            
             const fileTab = document.createElement('div');
             fileTab.className = 'file-tab';
             fileTab.setAttribute('data-file', filePath);
             
-            // ファイル名を取得（パスの最後の部分）
+            // ファイルタイプに基づく属性を設定
+            const fileType = getFileType(filePath);
+            fileTab.setAttribute('data-type', fileType);
+            
+            // ファイル名を取得（パスの最後の部分）とフォーマット
             const fileName = filePath.split('/').pop();
             
             fileTab.innerHTML = `
-                ${fileName}
+                ${formatFileNameForTab(fileName)}
                 <span class="close-tab" data-file="${filePath}">&times;</span>
             `;
             
@@ -620,27 +1051,42 @@
         function closeFileTab(filePath) {
             const tab = document.querySelector(`.file-tab[data-file="${filePath}"]`);
             
-            // デフォルトのタブは閉じられない
-            if (filePath === 'index.html' || filePath === 'style.css' || filePath === 'script.js') {
+            // デフォルトのタブでもインポートされたディレクトリの一部なら閉じられる
+            if (!isDirectoryImported && (filePath === 'index.html' || filePath === 'style.css' || filePath === 'script.js')) {
                 return;
             }
             
             // アクティブなタブを閉じる場合は、別のタブに切り替える
-            if (tab.classList.contains('active')) {
-                // デフォルトのindex.htmlタブを選択
-                openFile('index.html');
+            if (tab && tab.classList.contains('active')) {
+                // 次のタブを開くか、なければindex.htmlを開く
+                const tabs = Array.from(document.querySelectorAll('.file-tab'));
+                const currentIndex = tabs.indexOf(tab);
+                let nextTabIndex = currentIndex + 1;
+                
+                if (nextTabIndex >= tabs.length) {
+                    nextTabIndex = 0;
+                }
+                
+                if (tabs.length > 1) {
+                    const nextFilePath = tabs[nextTabIndex].getAttribute('data-file');
+                    openFile(nextFilePath);
+                } else {
+                    // これが最後のタブなら何もしない
+                    return;
+                }
             }
             
             // タブを削除
-            tab.remove();
+            if (tab) tab.remove();
+            
+            // もしカスタムファイルなら、ファイルも削除
+            if (customFiles[filePath] && !filePath.includes('/')) {
+                delete customFiles[filePath];
+                // ツリーからも削除
+                const treeItem = document.querySelector(`.tree-item.file[data-file="${filePath}"]`);
+                if (treeItem) treeItem.remove();
+            }
         }
-        
-        // ファイルの自動保存
-        [htmlEditor, cssEditor, jsEditor, customEditor].forEach(editor => {
-            editor.addEventListener('input', () => {
-                saveCurrentFile();
-            });
-        });
         
         // ファイル追加UI表示
         addFileBtn.addEventListener('click', () => {
@@ -691,7 +1137,7 @@
                 alert('有効なファイルパスを入力してください');
             }
         });
-        
+
         // ディレクトリインポート
         importDirBtn.addEventListener('click', () => {
             dirInput.click();
@@ -701,6 +1147,17 @@
             const files = e.target.files;
             
             if (files.length > 0) {
+                // ディレクトリインポートフラグを設定
+                isDirectoryImported = true;
+                
+                // カスタムファイルをクリア（リセット）
+                for (const key in customFiles) {
+                    delete customFiles[key];
+                }
+                
+                // ファイルタブをクリア
+                fileTabsContainer.innerHTML = '';
+                
                 // ファイル読み込み用の関数
                 const readFile = (file) => {
                     return new Promise((resolve, reject) => {
@@ -711,8 +1168,8 @@
                     });
                 };
                 
-                // ディレクトリ構造を構築
-                const directoryStructure = {};
+                // インポートしたファイルのインデックスHTMLを見つける
+                let indexHtmlPath = null;
                 
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
@@ -724,6 +1181,13 @@
                         try {
                             const content = await readFile(file);
                             customFiles[path] = content;
+                            
+                            // index.htmlを探す
+                            if (fileExt === 'html' && path.toLowerCase().includes('index.html')) {
+                                if (!indexHtmlPath || path.split('/').length < indexHtmlPath.split('/').length) {
+                                    indexHtmlPath = path;
+                                }
+                            }
                         } catch (error) {
                             console.error('ファイルの読み込み中にエラーが発生しました:', error);
                         }
@@ -732,6 +1196,22 @@
                 
                 // ディレクトリツリーを更新
                 updateDirectoryTree();
+                
+                // 見つかったindex.htmlを開く、なければ最初のHTMLファイルを開く
+                if (indexHtmlPath) {
+                    openFile(indexHtmlPath);
+                } else {
+                    // 最初のHTMLファイルを探す
+                    for (const path in customFiles) {
+                        if (path.endsWith('.html')) {
+                            openFile(path);
+                            break;
+                        }
+                    }
+                }
+                
+                // イベントが完了したら入力をクリアして次回も同じディレクトリを選択できるようにする
+                dirInput.value = '';
             }
         });
         
@@ -742,98 +1222,114 @@
             const rootChildren = directoryTree.querySelector('.tree-children');
             rootChildren.innerHTML = '';
             
-            // デフォルトのファイルを追加
-            const defaultFiles = [
-                { path: 'index.html', icon: 'html' },
-                { path: 'style.css', icon: 'css' },
-                { path: 'script.js', icon: 'js' }
-            ];
-            
-            // デフォルトファイルをツリーに追加
-            defaultFiles.forEach(file => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'tree-item file';
-                fileItem.setAttribute('data-file', file.path);
-                fileItem.innerHTML = `
-                    <span class="file-icon ${file.icon}"></span>
-                    <span>${file.path}</span>
-                `;
-                rootChildren.appendChild(fileItem);
+            if (!isDirectoryImported) {
+                // デモモード: デフォルトのファイルを追加
+                const defaultFiles = [
+                    { path: 'index.html', icon: 'html' },
+                    { path: 'style.css', icon: 'css' },
+                    { path: 'script.js', icon: 'js' }
+                ];
                 
-                // ファイルクリックイベント
-                fileItem.addEventListener('click', () => {
-                    openFile(file.path);
-                    
-                    // ツリーアイテムのアクティブ状態を更新
-                    document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('active'));
-                    fileItem.classList.add('active');
-                });
-            });
-            
-            // カスタムファイルの追加
-            const dirMap = {}; // ディレクトリ構造をマッピング
-            
-            // 全てのカスタムファイルをツリー構造に変換
-            Object.keys(customFiles).sort().forEach(filePath => {
-                const segments = filePath.split('/');
-                const fileName = segments.pop();
-                let currentPath = '';
-                let currentMap = dirMap;
-                
-                // ディレクトリパスを構築
-                segments.forEach(segment => {
-                    currentPath = currentPath ? `${currentPath}/${segment}` : segment;
-                    if (!currentMap[segment]) {
-                        currentMap[segment] = { _files: [], _path: currentPath };
-                    }
-                    currentMap = currentMap[segment];
-                });
-                
-                // ファイルをディレクトリに追加
-                currentMap._files.push({
-                    name: fileName,
-                    path: filePath
-                });
-            });
-            
-            // ディレクトリツリーを再帰的に構築
-            function buildTreeFromMap(map, parentElement) {
-                // ディレクトリを作成
-                Object.keys(map).forEach(dirName => {
-                    if (dirName === '_files' || dirName === '_path') return;
-                    
-                    const dirItem = document.createElement('div');
-                    dirItem.className = 'tree-item directory';
-                    dirItem.innerHTML = `
-                        <span class="tree-toggle">▶</span>
-                        <span class="file-icon folder"></span>
-                        <span>${dirName}</span>
+                // デフォルトファイルをツリーに追加
+                defaultFiles.forEach(file => {
+                    const fileItem = document.createElement('div');
+                    fileItem.className = 'tree-item file';
+                    fileItem.setAttribute('data-file', file.path);
+                    fileItem.innerHTML = `
+                        <span class="file-icon ${file.icon}"></span>
+                        <span>${file.path}</span>
                     `;
-                    parentElement.appendChild(dirItem);
+                    rootChildren.appendChild(fileItem);
+                });
+            } else {
+                // インポートモード: フォルダ構造を処理
+                const dirMap = {}; // ディレクトリ構造をマッピング
+                
+                // 全てのカスタムファイルをツリー構造に変換
+                Object.keys(customFiles).sort().forEach(filePath => {
+                    const segments = filePath.split('/');
+                    const fileName = segments.pop();
+                    let currentPath = '';
+                    let currentMap = dirMap;
                     
-                    // ディレクトリの子要素コンテナ
-                    const dirChildren = document.createElement('div');
-                    dirChildren.className = 'tree-children';
-                    parentElement.appendChild(dirChildren);
-                    
-                    // ディレクトリトグルイベント
-                    dirItem.querySelector('.tree-toggle').addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        dirChildren.classList.toggle('expanded');
-                        e.target.textContent = dirChildren.classList.contains('expanded') ? '▼' : '▶';
+                    // ディレクトリパスを構築
+                    segments.forEach(segment => {
+                        currentPath = currentPath ? `${currentPath}/${segment}` : segment;
+                        if (!currentMap[segment]) {
+                            currentMap[segment] = { _files: [], _path: currentPath };
+                        }
+                        currentMap = currentMap[segment];
                     });
                     
-                    // 子ディレクトリを再帰的に構築
-                    buildTreeFromMap(map[dirName], dirChildren);
-                    
-                    // このディレクトリのファイルを追加
-                    map[dirName]._files.forEach(file => {
+                    // ファイルをディレクトリに追加
+                    currentMap._files.push({
+                        name: fileName,
+                        path: filePath
+                    });
+                });
+                
+                // ディレクトリツリーを再帰的に構築
+                function buildTreeFromMap(map, parentElement) {
+                    // ディレクトリを作成
+                    Object.keys(map).forEach(dirName => {
+                        if (dirName === '_files' || dirName === '_path') return;
+                        
+                        const dirItem = document.createElement('div');
+                        dirItem.className = 'tree-item directory';
+                        dirItem.innerHTML = `
+                            <span class="tree-toggle">▶</span>
+                            <span class="file-icon folder"></span>
+                            <span>${dirName}</span>
+                        `;
+                        parentElement.appendChild(dirItem);
+                        
+                        // ディレクトリの子要素コンテナ
+                        const dirChildren = document.createElement('div');
+                        dirChildren.className = 'tree-children';
+                        parentElement.appendChild(dirChildren);
+                        
+                        // ディレクトリトグルイベント
+                        dirItem.querySelector('.tree-toggle').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            dirChildren.classList.toggle('expanded');
+                            e.target.textContent = dirChildren.classList.contains('expanded') ? '▼' : '▶';
+                        });
+                        
+                        // 子ディレクトリを再帰的に構築
+                        buildTreeFromMap(map[dirName], dirChildren);
+                        
+                        // このディレクトリのファイルを追加
+                        map[dirName]._files.forEach(file => {
+                            const fileItem = document.createElement('div');
+                            fileItem.className = 'tree-item file';
+                            fileItem.setAttribute('data-file', file.path);
+                            
+                            // ファイルの拡張子に基づいてアイコンを設定
+                            const fileExt = file.name.split('.').pop().toLowerCase();
+                            let iconClass = 'file';
+                            
+                            if (fileExt === 'html') iconClass = 'html';
+                            else if (fileExt === 'css') iconClass = 'css';
+                            else if (fileExt === 'js') iconClass = 'js';
+                            
+                            fileItem.innerHTML = `
+                                <span class="file-icon ${iconClass}"></span>
+                                <span>${file.name}</span>
+                            `;
+                            
+                            dirChildren.appendChild(fileItem);
+                        });
+                    });
+                }
+                
+                // ルートレベルのファイル（ディレクトリにないもの）を追加
+                Object.keys(customFiles).forEach(filePath => {
+                    if (!filePath.includes('/')) {
                         const fileItem = document.createElement('div');
                         fileItem.className = 'tree-item file';
-                        fileItem.setAttribute('data-file', file.path);
+                        fileItem.setAttribute('data-file', filePath);
                         
-                        // ファイルの拡張子に基づいてアイコンを設定
-                        const fileExt = file.name.split('.').pop().toLowerCase();
+                        const fileExt = filePath.split('.').pop().toLowerCase();
                         let iconClass = 'file';
                         
                         if (fileExt === 'html') iconClass = 'html';
@@ -842,57 +1338,23 @@
                         
                         fileItem.innerHTML = `
                             <span class="file-icon ${iconClass}"></span>
-                            <span>${file.name}</span>
+                            <span>${filePath}</span>
                         `;
                         
-                        dirChildren.appendChild(fileItem);
-                        
-                        // ファイルクリックイベント
-                        fileItem.addEventListener('click', () => {
-                            openFile(file.path);
-                            
-                            // ツリーアイテムのアクティブ状態を更新
-                            document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('active'));
-                            fileItem.classList.add('active');
-                        });
-                    });
+                        rootChildren.appendChild(fileItem);
+                    }
                 });
+                
+                // ディレクトリツリーを構築
+                buildTreeFromMap(dirMap, rootChildren);
             }
             
-            // ルートレベルのファイル（ディレクトリにないもの）を追加
-            Object.keys(customFiles).forEach(filePath => {
-                if (!filePath.includes('/')) {
-                    const fileItem = document.createElement('div');
-                    fileItem.className = 'tree-item file';
-                    fileItem.setAttribute('data-file', filePath);
-                    
-                    const fileExt = filePath.split('.').pop().toLowerCase();
-                    let iconClass = 'file';
-                    
-                    if (fileExt === 'html') iconClass = 'html';
-                    else if (fileExt === 'css') iconClass = 'css';
-                    else if (fileExt === 'js') iconClass = 'js';
-                    
-                    fileItem.innerHTML = `
-                        <span class="file-icon ${iconClass}"></span>
-                        <span>${filePath}</span>
-                    `;
-                    
-                    rootChildren.appendChild(fileItem);
-                    
-                    // ファイルクリックイベント
-                    fileItem.addEventListener('click', () => {
-                        openFile(filePath);
-                        
-                        // ツリーアイテムのアクティブ状態を更新
-                        document.querySelectorAll('.tree-item').forEach(i => i.classList.remove('active'));
-                        fileItem.classList.add('active');
-                    });
-                }
-            });
+            // ツリーを展開状態に
+            rootDir.querySelector('.tree-toggle').textContent = '▼';
+            rootChildren.classList.add('expanded');
             
-            // ディレクトリツリーを構築
-            buildTreeFromMap(dirMap, rootChildren);
+            // ファイルクリックイベントを再設定
+            setupFileTreeListeners();
         }
         
         // プレビュー表示
@@ -951,52 +1413,84 @@
             // iframeの内容をクリア
             iframeDoc.open();
             
-            // Blobを使用してファイルURLを作成
-            const htmlBlob = new Blob([files['index.html']], { type: 'text/html' });
-            const cssBlob = new Blob([files['style.css']], { type: 'text/css' });
-            const jsBlob = new Blob([files['script.js']], { type: 'text/javascript' });
-            
-            // メインファイルのURLを作成
-            const htmlUrl = URL.createObjectURL(htmlBlob);
-            const cssUrl = URL.createObjectURL(cssBlob);
-            const jsUrl = URL.createObjectURL(jsBlob);
-            
-            // カスタムファイルのURLを作成
-            const customFileUrls = {};
-            Object.keys(customFiles).forEach(filePath => {
-                const fileType = filePath.split('.').pop().toLowerCase();
-                let mimeType = 'text/plain';
+            if (isDirectoryImported) {
+                // インポートモード: 読み込まれたHTMLファイルからプレビューを生成
+                const mainHtmlFile = currentEditingFile.endsWith('.html') ? 
+                    currentEditingFile : 
+                    Object.keys(customFiles).find(f => f.endsWith('.html'));
                 
-                if (fileType === 'css') {
-                    mimeType = 'text/css';
-                } else if (fileType === 'js') {
-                    mimeType = 'text/javascript';
-                } else if (fileType === 'html') {
-                    mimeType = 'text/html';
+                if (mainHtmlFile && customFiles[mainHtmlFile]) {
+                    // カスタムファイルのURLを作成
+                    const customFileUrls = {};
+                    Object.keys(customFiles).forEach(filePath => {
+                        const fileType = filePath.split('.').pop().toLowerCase();
+                        let mimeType = 'text/plain';
+                        
+                        if (fileType === 'css') {
+                            mimeType = 'text/css';
+                        } else if (fileType === 'js') {
+                            mimeType = 'text/javascript';
+                        } else if (fileType === 'html') {
+                            mimeType = 'text/html';
+                        }
+                        
+                        const blob = new Blob([customFiles[filePath]], { type: mimeType });
+                        customFileUrls[filePath] = URL.createObjectURL(blob);
+                    });
+                    
+                    // HTMLの相対パスを置き換え
+                    let htmlContent = customFiles[mainHtmlFile];
+                    const basePath = mainHtmlFile.includes('/') ? 
+                        mainHtmlFile.substring(0, mainHtmlFile.lastIndexOf('/') + 1) : '';
+                    
+                    // 相対パス参照を置き換え
+                    Object.keys(customFileUrls).forEach(filePath => {
+                        const fileName = filePath.split('/').pop();
+                        const relativePath = filePath.replace(basePath, '');
+                        
+                        const escapedPath = relativePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        const regex1 = new RegExp('(href|src)\\s*=\\s*["\']' + escapedPath + '["\']', 'g');
+                        const regex2 = new RegExp('(href|src)\\s*=\\s*["\']' + fileName + '["\']', 'g');
+                        
+                        htmlContent = htmlContent.replace(regex1, `$1="${customFileUrls[filePath]}"`);
+                        if (filePath !== mainHtmlFile) {
+                            htmlContent = htmlContent.replace(regex2, `$1="${customFileUrls[filePath]}"`);
+                        }
+                    });
+                    
+                    // HTMLをiframeに書き込む
+                    iframeDoc.write(htmlContent);
+                } else {
+                    iframeDoc.write('<html><body><h1>HTMLファイルが見つかりません</h1></body></html>');
                 }
+            } else {
+                // デモモード: デフォルトの3ファイルでプレビュー
+                // Blobを使用してファイルURLを作成
+                const htmlBlob = new Blob([files['index.html']], { type: 'text/html' });
+                const cssBlob = new Blob([files['style.css']], { type: 'text/css' });
+                const jsBlob = new Blob([files['script.js']], { type: 'text/javascript' });
                 
-                const blob = new Blob([customFiles[filePath]], { type: mimeType });
-                customFileUrls[filePath] = URL.createObjectURL(blob);
-            });
+                // メインファイルのURLを作成
+                const htmlUrl = URL.createObjectURL(htmlBlob);
+                const cssUrl = URL.createObjectURL(cssBlob);
+                const jsUrl = URL.createObjectURL(jsBlob);
+                
+                // カスタムファイルへの参照を置き換え
+                let htmlContent = files['index.html'];
+                
+                // style.cssとscript.jsの参照を置き換え
+                htmlContent = htmlContent.replace(/href\s*=\s*["']style\.css["']/g, `href="${cssUrl}"`);
+                htmlContent = htmlContent.replace(/src\s*=\s*["']script\.js["']/g, `src="${jsUrl}"`);
+                
+                // HTMLをiframeに書き込む
+                iframeDoc.write(htmlContent);
+            }
             
-            // カスタムファイルへの参照を置き換え
-            let htmlContent = files['index.html'];
-            
-            // style.cssとscript.jsの参照を置き換え
-            htmlContent = htmlContent.replace(/href\s*=\s*["']style\.css["']/g, `href="${cssUrl}"`);
-            htmlContent = htmlContent.replace(/src\s*=\s*["']script\.js["']/g, `src="${jsUrl}"`);
-            
-            // カスタムファイルの参照を置き換え
-            Object.keys(customFileUrls).forEach(filePath => {
-                const escapedPath = filePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                const regex = new RegExp('(href|src)\\s*=\\s*["\']' + escapedPath + '["\']', 'g');
-                htmlContent = htmlContent.replace(regex, `$1="${customFileUrls[filePath]}"`);
-            });
-            
-            // HTMLをiframeに書き込む
-            iframeDoc.write(htmlContent);
             iframeDoc.close();
         }
+
+        // 初期化時にシンタックスハイライト表示
+        htmlHighlight.classList.remove('hidden');
     </script>
 </body>
 </html>
