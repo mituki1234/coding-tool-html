@@ -13,53 +13,45 @@
   <!-- Font Awesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
   <style>
-  	body {
-  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f5f5f5;
-  color: #333;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* 基本フォントと変数 */
+  /* Modern design for your web code editor */
 :root {
-  /* カラーパレット */
-  --primary: #4a6bfa;
-  --primary-light: #eaefff;
-  --primary-dark: #3a53c2;
-  --accent: #ff4081;
-  --dark: #1a1a2e;
-  --dark-lighter: #16213e;
-  --dark-lightest: #21325e;
-  --light: #f5f9fc;
-  --text: #2d3748;
-  --text-light: #718096;
-  --border: #e2e8f0;
-  --success: #38b2ac;
-  --warning: #f6ad55;
-  --error: #f56565;
-  --divider: rgba(0, 0, 0, 0.1);
+  /* Modern color palette */
+  --primary: #4d7fff;
+  --primary-light: #eef3ff;
+  --primary-dark: #3a66cc;
+  --accent: #ff5680;
+  --dark: #1e1e2e;
+  --dark-lighter: #282a36;
+  --dark-lightest: #313244;
+  --light: #f9fafc;
+  --text: #374151;
+  --text-light: #64748b;
+  --border: #e4e7ec;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --divider: rgba(0, 0, 0, 0.08);
   
-  /* フォント */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Monaco, 'Courier New', monospace;
+  /* Premium fonts similar to Mac VSCode + Cica-like monospace font */
+  --font-sans: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  --font-mono: 'Fira Code', 'Cica', 'UDEV Gothic', 'Ricty', 'Inconsolata', 'Source Han Code JP', monospace;
   
-  /* サイズ */
-  --border-radius: 6px;
-  --transition-speed: 0.15s;
+  /* Refined sizes and transitions */
+  --border-radius: 8px;
+  --transition-speed: 0.2s;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
-/* ベースリセットとフォント */
+/* Base styling with smoother transitions */
 * {
   box-sizing: border-box;
   transition: background-color var(--transition-speed) ease, 
               color var(--transition-speed) ease,
               border-color var(--transition-speed) ease,
-              box-shadow var(--transition-speed) ease;
+              box-shadow var(--transition-speed) ease,
+              transform var(--transition-speed) ease;
 }
 
 body, html {
@@ -68,31 +60,37 @@ body, html {
   margin: 0;
   padding: 0;
   background-color: var(--light);
+  line-height: 1.5;
+  font-size: 14px;
+  height: 100vh;
+  overflow: hidden;
 }
 
-/* Top menubar styles */
+/* Modern menubar with refined styling */
 .menubar {
   background-color: var(--dark);
   color: white;
   width: 100%;
   display: flex;
   align-items: center;
-  height: 38px;
+  height: 42px;
   font-size: 13px;
   padding: 0;
   margin: 0;
   z-index: 1000;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.15);
 }
 
 .menubar-item {
-  padding: 0 12px;
+  padding: 0 14px;
   height: 100%;
   display: flex;
   align-items: center;
   cursor: pointer;
   position: relative;
   transition: background-color 0.2s;
+  font-weight: 500;
+  letter-spacing: 0.2px;
 }
 
 .menubar-item:hover {
@@ -102,18 +100,18 @@ body, html {
 .menu-separator {
   width: 1px;
   height: 20px;
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.12);
   margin: 0 5px;
 }
 
 .app-title {
-  padding: 0 12px;
-  font-weight: 500;
+  padding: 0 14px;
+  font-weight: 600;
   color: white;
   letter-spacing: 0.3px;
 }
 
-/* Main container and content area */
+/* Content layout with improved spacing */
 .content-container {
   display: flex;
   flex: 1;
@@ -121,7 +119,7 @@ body, html {
   background-color: var(--light);
 }
 
-/* Button styles */
+/* Enhanced button styles */
 button {
   background-color: var(--primary);
   color: white;
@@ -130,44 +128,47 @@ button {
   margin-right: 10px;
   border-radius: var(--border-radius);
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 13px;
+  font-weight: 600;
   transition: all 0.2s;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 5px rgba(74, 107, 250, 0.2);
+  box-shadow: 0 2px 5px rgba(77, 127, 255, 0.2);
+  letter-spacing: 0.3px;
 }
 
 button:hover {
   background-color: var(--primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(74, 107, 250, 0.3);
+  box-shadow: 0 4px 8px rgba(77, 127, 255, 0.3);
 }
 
 button:active {
   transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(74, 107, 250, 0.2);
+  box-shadow: 0 1px 3px rgba(77, 127, 255, 0.2);
 }
 
 button i {
-  margin-right: 6px;
+  margin-right: 8px;
+  font-size: 0.9em;
 }
 
-/* Main container */
+/* Refined main container layout */
 .editor-container {
   display: flex;
   gap: 24px;
   flex: 1;
   overflow: hidden;
-  padding: 20px;
+  padding: 24px;
 }
 
+/* Modernized file list panel */
 #fileList {
   flex: 0 0 260px;
   background-color: white;
   border-radius: var(--border-radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-md);
   height: 100%;
   overflow: auto;
   border: 1px solid var(--border);
@@ -180,9 +181,11 @@ button i {
   border-bottom: 1px solid var(--border);
   color: var(--primary);
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
+  letter-spacing: 0.3px;
 }
 
+/* Improved folder styling */
 .folder-header {
   display: flex;
   align-items: center;
@@ -208,11 +211,12 @@ button i {
   padding-left: 12px;
 }
 
+/* Enhanced file list items */
 #filesUl {
   list-style-type: none;
   padding-left: 0;
   margin: 12px 16px;
-  border-radius: 6px;
+  border-radius: var(--border-radius);
   min-height: 50px;
 }
 
@@ -221,7 +225,7 @@ button i {
   align-items: center;
   cursor: pointer;
   padding: 10px 14px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   border-radius: var(--border-radius);
   transition: all 0.15s;
 }
@@ -236,6 +240,7 @@ button i {
 #filesUl li:hover {
   background-color: var(--primary-light);
   color: var(--primary);
+  transform: translateX(2px);
 }
 
 #filesUl li:hover i {
@@ -247,13 +252,14 @@ button i {
   border-left: 3px solid var(--primary);
   padding-left: 11px;
   color: var(--primary);
+  font-weight: 500;
 }
 
 #filesUl li.active i {
   color: var(--primary);
 }
 
-/* File extension styling */
+/* Modern file extension badges */
 .file-name {
   flex: 1;
   font-size: 14px;
@@ -280,18 +286,18 @@ button i {
 }
 
 .ext-js {
-  color: #f0db4f;
-  background-color: rgba(240, 219, 79, 0.1);
+  color: #f7df1e;
+  background-color: rgba(247, 223, 30, 0.1);
 }
 
 .ext-json {
   color: #000000;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.08);
 }
 
 .ext-md {
-  color: #083fa1;
-  background-color: rgba(8, 63, 161, 0.1);
+  color: #0077b6;
+  background-color: rgba(0, 119, 182, 0.1);
 }
 
 .ext-txt {
@@ -305,27 +311,31 @@ button i {
 }
 
 .ext-py {
-  color: #306998;
-  background-color: rgba(48, 105, 152, 0.1);
+  color: #3776ab;
+  background-color: rgba(55, 118, 171, 0.1);
 }
 
+/* Enhanced editor wrapper */
 #editorWrapper {
   flex: 1;
   background-color: white;
   border-radius: var(--border-radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border);
 }
 
+/* CodeMirror styling for a premium look */
 .CodeMirror {
   border: none;
   height: 100% !important;
   font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.5;
+  letter-spacing: 0.3px;
+  font-feature-settings: "calt" 1, "ss01" 1, "ss02" 1, "ss03" 1, "liga" 1;
 }
 
 .CodeMirror-gutters {
@@ -338,76 +348,77 @@ button i {
   opacity: 0.7;
 }
 
-/* シンタックスハイライト - モダンカラースキーム */
+/* Enhanced syntax highlighting - VSCode inspired */
 .cm-comment {
-  color: #888888 !important;
+  color: #6a737d !important;
   font-style: italic;
 }
 
 .cm-tag {
-  color: var(--primary) !important;
+  color: #22863a !important;
+  font-weight: 500;
 }
 
 .cm-attribute {
-  color: #0ea5e9 !important;
+  color: #005cc5 !important;
 }
 
 .cm-string {
-  color: #16a34a !important;
+  color: #032f62 !important;
 }
 
 .cm-bracket {
-  color: #9333ea !important;
+  color: #6f42c1 !important;
   font-weight: normal;
 }
 
 .cm-qualifier {
-  color: var(--primary) !important;
+  color: #22863a !important;
 }
 
 .cm-builtin {
-  color: #0ea5e9 !important;
+  color: #6f42c1 !important;
 }
 
 .cm-property {
-  color: #0ea5e9 !important;
+  color: #005cc5 !important;
 }
 
 .cm-number {
-  color: #f59e0b !important;
+  color: #e36209 !important;
 }
 
 .cm-atom {
-  color: var(--primary) !important;
+  color: #005cc5 !important;
 }
 
 .cm-variable, .cm-variable-2 {
-  color: #0ea5e9 !important;
+  color: #24292e !important;
 }
 
 .cm-variable-3 {
-  color: #9333ea !important;
+  color: #6f42c1 !important;
 }
 
 .cm-keyword {
-  color: var(--primary) !important;
+  color: #d73a49 !important;
   font-weight: 500;
 }
 
 .cm-operator {
-  color: #0ea5e9 !important;
+  color: #d73a49 !important;
 }
 
 .cm-def {
-  color: #9333ea !important;
+  color: #6f42c1 !important;
 }
 
 .cm-punctuation {
-  color: #9333ea !important;
+  color: #24292e !important;
 }
 
 .cm-meta {
-  color: #888888 !important;
+  color: #6a737d !important;
 }
 
 .cm-error {
@@ -415,415 +426,7 @@ button i {
   text-decoration: underline wavy var(--error);
 }
 
-.cm-header {
-  color: var(--primary) !important;
-  font-weight: bold;
-}
-
-.cm-quote {
-  color: #0ea5e9 !important;
-  font-style: italic;
-}
-
-.cm-link {
-  color: #0ea5e9 !important;
-  text-decoration: underline;
-}
-
-.cm-negative {
-  color: var(--primary) !important;
-}
-
-.cm-positive {
-  color: #f59e0b !important;
-}
-
-.cm-hr {
-  color: #888888 !important;
-}
-
-.cm-em {
-  color: #9333ea !important;
-  font-style: italic;
-}
-
-.cm-strong {
-  color: var(--primary) !important;
-  font-weight: bold;
-}
-
-/* HTMLタグ関連 */
-.cm-m-xml.cm-bracket {
-  color: #9333ea !important;
-}
-
-.cm-m-xml.cm-tag {
-  color: var(--primary) !important;
-}
-
-.cm-m-xml.cm-attribute {
-  color: #0ea5e9 !important;
-}
-
-/* JavaScript関連 */
-.cm-m-javascript.cm-bracket {
-  color: #9333ea !important;
-}
-
-.cm-m-javascript.cm-string-2 {
-  color: #f59e0b !important;
-}
-
-/* CSS関連 */
-.cm-m-css.cm-bracket {
-  color: #9333ea !important;
-}
-
-.cm-m-css.cm-unit {
-  color: #f59e0b !important;
-}
-
-/* エディタダークモード */
-.cm-s-darcula .CodeMirror-cursor {
-  border-left: 2px solid #f8f8f2;
-}
-
-.cm-s-darcula .CodeMirror-selected {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.cm-s-darcula .CodeMirror-line::selection,
-.cm-s-darcula .CodeMirror-line > span::selection,
-.cm-s-darcula .CodeMirror-line > span > span::selection {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-/* 現在のディレクトリのパス表示 */
-.current-path {
-  background-color: var(--light);
-  padding: 10px 16px;
-  border-radius: var(--border-radius);
-  margin-bottom: 16px;
-  font-size: 13px;
-  color: var(--text-light);
-  border-left: 3px solid var(--primary);
-  display: flex;
-  align-items: center;
-}
-
-.current-path i {
-  margin-right: 8px;
-  color: var(--primary);
-}
-
-.directory-badge {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--primary);
-  color: white;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  margin-bottom: 12px;
-  font-weight: 500;
-  box-shadow: 0 2px 5px rgba(74, 107, 250, 0.2);
-}
-
-.directory-badge i {
-  margin-right: 6px;
-  font-size: 11px;
-}
-
-/* ディレクトリ操作ボタン */
-.directory-actions {
-  display: flex;
-  margin-bottom: 16px;
-  gap: 10px;
-}
-
-.directory-actions button {
-  font-size: 12px;
-  padding: 6px 12px;
-  background-color: white;
-  color: var(--text);
-  border: 1px solid var(--border);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-}
-
-.directory-actions button:hover {
-  background-color: var(--light);
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.directory-actions button i {
-  margin-right: 6px;
-  transition: transform 0.2s;
-}
-
-.directory-actions button:hover i {
-  transform: translateY(-1px);
-}
-
-/* テーマ切り替えボタン */
-.theme-switch {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 14px;
-  color: white;
-  cursor: pointer;
-  height: 100%;
-  opacity: 0.8;
-  transition: opacity 0.2s;
-}
-
-.theme-switch:hover {
-  background-color: var(--dark-lighter);
-  opacity: 1;
-}
-
-.theme-switch i {
-  margin-right: 6px;
-}
-
-/* フォルダツリー表示 */
-.tree-view {
-  margin-left: 0;
-  padding-left: 0;
-}
-
-.tree-item {
-  list-style-type: none;
-  margin-bottom: 6px;
-}
-
-.tree-dir {
-  padding-left: 0;
-}
-
-.tree-dir-contents {
-  padding-left: 20px;
-  border-left: 1px dashed var(--border);
-  margin-left: 10px;
-  margin-top: 6px;
-  display: none;
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.tree-dir-open > .tree-dir-contents {
-  display: block;
-}
-
-.tree-dir-header {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: var(--border-radius);
-  transition: all 0.15s;
-}
-
-.tree-dir-header:hover {
-  background-color: var(--primary-light);
-  color: var(--primary);
-}
-
-.tree-dir-header i {
-  margin-right: 8px;
-  color: var(--primary);
-  transition: transform 0.2s;
-}
-
-.tree-dir-open > .tree-dir-header i {
-  transform: rotate(90deg);
-}
-
-.tree-file {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: var(--border-radius);
-  transition: all 0.15s;
-}
-
-.tree-file:hover {
-  background-color: var(--primary-light);
-  color: var(--primary);
-}
-
-.tree-file i {
-  margin-right: 8px;
-  color: var(--text-light);
-}
-
-.tree-file:hover i {
-  color: var(--primary);
-}
-
-.tree-file.active {
-  background-color: var(--primary-light);
-  border-left: 3px solid var(--primary);
-  padding-left: 7px;
-  color: var(--primary);
-}
-
-.tree-file.active i {
-  color: var(--primary);
-}
-
-/* モーダル */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(2px);
-  animation: fadeIn 0.2s;
-}
-
-.modal-content {
-  background-color: #fff;
-  margin: 10% auto;
-  padding: 24px;
-  border-radius: var(--border-radius);
-  width: 450px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  animation: slideIn 0.3s;
-}
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.modal-header h3 {
-  margin: 0;
-  color: var(--primary);
-  font-weight: 600;
-  font-size: 18px;
-}
-
-.modal-close {
-  font-size: 24px;
-  cursor: pointer;
-  color: var(--text-light);
-  transition: color 0.2s;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-.modal-close:hover {
-  color: var(--accent);
-  background-color: rgba(255, 64, 129, 0.08);
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 24px;
-  gap: 12px;
-}
-
-.modal-form-group {
-  margin-bottom: 20px;
-}
-
-.modal-form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.modal-form-group input {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--border-radius);
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.modal-form-group input:focus {
-  border-color: var(--primary);
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(74, 107, 250, 0.15);
-}
-
-/* ドロップダウンメニュー */
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: var(--dark-lighter);
-  min-width: 200px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  top: 38px;
-  left: 0;
-  border: 1px solid var(--dark-lightest);
-  border-radius: 0 0 var(--border-radius) var(--border-radius);
-  overflow: hidden;
-  animation: fadeIn 0.2s;
-}
-
-.dropdown-content a {
-  color: rgba(255, 255, 255, 0.85);
-  padding: 10px 16px;
-  text-decoration: none;
-  display: block;
-  font-size: 13px;
-  transition: all 0.15s;
-}
-
-.dropdown-content a:hover {
-  background-color: var(--dark-lightest);
-  color: #ffffff;
-}
-
-.dropdown:hover .dropdown-content {
-  display: block;
-}
-
-.dropdown-content .dropdown-divider {
-  height: 1px;
-  background-color: rgba(255, 255, 255, 0.1);
-  margin: 6px 0;
-}
-
-.dropdown-content a i {
-  margin-right: 10px;
-  width: 16px;
-  text-align: center;
-  opacity: 0.8;
-}
-
-/* ファイルタブ */
+/* Modern file tabs */
 .editor-tabs {
   display: flex;
   background-color: var(--light);
@@ -890,6 +493,7 @@ button i {
   opacity: 1;
 }
 
+/* Tab icons with improved colors */
 .editor-tab.html-tab .tab-icon {
   color: #e34c26;
 }
@@ -899,22 +503,384 @@ button i {
 }
 
 .editor-tab.js-tab .tab-icon {
-  color: #f0db4f;
+  color: #f7df1e;
 }
 
 .editor-tab.json-tab .tab-icon {
-  color: #000000;
+  color: #292929;
 }
 
 .editor-tab.md-tab .tab-icon {
-  color: #083fa1;
+  color: #0077b6;
 }
 
 .editor-tab.txt-tab .tab-icon {
   color: #6e6e6e;
 }
 
-/* ダークモード */
+/* Improved tree view */
+.tree-view {
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.tree-item {
+  list-style-type: none;
+  margin-bottom: 6px;
+}
+
+.tree-dir {
+  padding-left: 0;
+}
+
+.tree-dir-contents {
+  padding-left: 20px;
+  border-left: 1px dashed var(--border);
+  margin-left: 10px;
+  margin-top: 6px;
+  display: none;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tree-dir-open > .tree-dir-contents {
+  display: block;
+}
+
+.tree-dir-header {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  transition: all 0.15s;
+}
+
+.tree-dir-header:hover {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  transform: translateX(2px);
+}
+
+.tree-dir-header i {
+  margin-right: 8px;
+  color: var(--primary);
+  transition: transform 0.2s;
+}
+
+.tree-dir-open > .tree-dir-header i {
+  transform: rotate(90deg);
+}
+
+.tree-file {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: var(--border-radius);
+  transition: all 0.15s;
+}
+
+.tree-file:hover {
+  background-color: var(--primary-light);
+  color: var(--primary);
+  transform: translateX(2px);
+}
+
+.tree-file i {
+  margin-right: 8px;
+  color: var(--text-light);
+}
+
+.tree-file:hover i {
+  color: var(--primary);
+}
+
+.tree-file.active {
+  background-color: var(--primary-light);
+  border-left: 3px solid var(--primary);
+  padding-left: 9px;
+  color: var(--primary);
+}
+
+.tree-file.active i {
+  color: var(--primary);
+}
+
+/* Modern modal design */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s;
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 28px;
+  border-radius: var(--border-radius);
+  width: 450px;
+  box-shadow: var(--shadow-lg);
+  animation: slideIn 0.3s;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 0.2px;
+}
+
+.modal-close {
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--text-light);
+  transition: color 0.2s;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.modal-close:hover {
+  color: var(--accent);
+  background-color: rgba(255, 86, 128, 0.08);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 28px;
+  gap: 12px;
+}
+
+.modal-form-group {
+  margin-bottom: 22px;
+}
+
+.modal-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.modal-form-group input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  transition: all 0.2s;
+  font-family: var(--font-sans);
+}
+
+.modal-form-group input:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(77, 127, 255, 0.15);
+}
+
+/* Current path display */
+.current-path {
+  background-color: var(--light);
+  padding: 10px 16px;
+  border-radius: var(--border-radius);
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--text-light);
+  border-left: 3px solid var(--primary);
+  display: flex;
+  align-items: center;
+}
+
+.current-path i {
+  margin-right: 8px;
+  color: var(--primary);
+}
+
+.directory-badge {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--primary);
+  color: white;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(77, 127, 255, 0.2);
+}
+
+.directory-badge i {
+  margin-right: 6px;
+  font-size: 11px;
+}
+
+/* Directory operation buttons */
+.directory-actions {
+  display: flex;
+  margin-bottom: 16px;
+  gap: 10px;
+}
+
+.directory-actions button {
+  font-size: 12px;
+  padding: 6px 12px;
+  background-color: white;
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.directory-actions button:hover {
+  background-color: var(--light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.directory-actions button i {
+  margin-right: 6px;
+  transition: transform 0.2s;
+}
+
+.directory-actions button:hover i {
+  transform: translateY(-1px);
+}
+
+/* Theme switch button */
+.theme-switch {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  color: white;
+  cursor: pointer;
+  height: 100%;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.theme-switch:hover {
+  background-color: var(--dark-lighter);
+  opacity: 1;
+}
+
+.theme-switch i {
+  margin-right: 6px;
+}
+
+/* Dropdown menu */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: var(--dark-lighter);
+  min-width: 200px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  top: 38px;
+  left: 0;
+  border: 1px solid var(--dark-lightest);
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+  overflow: hidden;
+  animation: fadeIn 0.2s;
+}
+
+.dropdown-content a {
+  color: rgba(255, 255, 255, 0.85);
+  padding: 10px 16px;
+  text-decoration: none;
+  display: block;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+
+.dropdown-content a:hover {
+  background-color: var(--dark-lightest);
+  color: #ffffff;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown-content .dropdown-divider {
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin: 6px 0;
+}
+
+.dropdown-content a i {
+  margin-right: 10px;
+  width: 16px;
+  text-align: center;
+  opacity: 0.8;
+}
+
+/* Status bar at the bottom */
+.statusbar {
+  display: flex;
+  align-items: center;
+  height: 24px;
+  background-color: var(--dark);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.statusbar-item {
+  margin-right: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.statusbar-item i {
+  margin-right: 6px;
+  font-size: 10px;
+}
+
+.statusbar-right {
+  margin-left: auto;
+  display: flex;
+}
+
+.statusbar-right .statusbar-item {
+  margin-right: 0;
+  margin-left: 15px;
+}
+
+/* Enhanced dark mode */
 body.dark-mode {
   background-color: var(--dark);
   color: rgba(255, 255, 255, 0.9);
@@ -929,7 +895,7 @@ body.dark-mode #editorWrapper {
 
 body.dark-mode .folder-header,
 body.dark-mode #filesUl li {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 body.dark-mode #fileList h3 {
@@ -941,11 +907,11 @@ body.dark-mode .folder-contents {
 }
 
 body.dark-mode #filesUl li:hover {
-  background-color: rgba(74, 107, 250, 0.15);
+  background-color: rgba(77, 127, 255, 0.15);
 }
 
 body.dark-mode #filesUl li.active {
-  background-color: rgba(74, 107, 250, 0.2);
+  background-color: rgba(77, 127, 255, 0.2);
 }
 
 body.dark-mode .tree-dir-contents {
@@ -998,7 +964,7 @@ body.dark-mode .modal-content {
 }
 
 body.dark-mode .modal-form-group label {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.85);
 }
 
 body.dark-mode .modal-form-group input {
@@ -1009,150 +975,258 @@ body.dark-mode .modal-form-group input {
 
 body.dark-mode .modal-form-group input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(74, 107, 250, 0.25);
+  box-shadow: 0 0 0 3px rgba(77, 127, 255, 0.25);
 }
 
-/* ステータスバー */
-.status-bar {
-  background-color: var(--primary);
+/* Dark mode CodeMirror */
+body.dark-mode .CodeMirror {
+  background-color: var(--dark-lighter) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+body.dark-mode .CodeMirror-gutters {
+  background-color: var(--dark) !important;
+  border-right-color: var(--dark-lightest) !important;
+}
+
+body.dark-mode .CodeMirror-linenumber {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+/* Dark mode syntax highlighting */
+body.dark-mode .cm-comment {
+  color: #8b949e !important;
+}
+
+body.dark-mode .cm-tag {
+  color: #7ee787 !important;
+}
+
+body.dark-mode .cm-attribute {
+  color: #79c0ff !important;
+}
+
+body.dark-mode .cm-string {
+  color: #a5d6ff !important;
+}
+
+body.dark-mode .cm-bracket {
+  color: #d2a8ff !important;
+}
+
+body.dark-mode .cm-variable, body.dark-mode .cm-variable-2 {
+  color: #c9d1d9 !important;
+}
+
+body.dark-mode .cm-keyword {
+  color: #ff7b72 !important;
+}
+
+body.dark-mode .cm-property {
+  color: #79c0ff !important;
+}
+
+body.dark-mode .cm-number {
+  color: #ffa657 !important;
+}
+
+body.dark-mode .cm-atom {
+  color: #79c0ff !important;
+}
+
+body.dark-mode .cm-meta {
+  color: #8b949e !important;
+}
+
+/* User info display */
+.user-info {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
   color: white;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
   font-size: 12px;
-  font-weight: 500;
+  opacity: 0.8;
 }
 
-.status-item {
-  margin-right: 18px;
-  display: flex;
-  align-items: center;
-  opacity: 0.9;
-}
-
-.status-item i {
+.user-info i {
   margin-right: 6px;
+  color: var(--primary-light);
 }
 
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-  .editor-container {
-    flex-direction: column;
-    padding: 16px;
-    gap: 16px;
-  }
-  
-  #fileList, #editorWrapper {
-    flex: none;
-    width: 100%;
-    height: auto;
-  }
-  
-  #fileList {
-    margin-bottom: 16px;
-    height: 220px;
-  }
-  
-  #editorWrapper {
-    height: 550px;
-  }
+/* Last modification timestamp */
+.last-modified {
+  position: absolute;
+  bottom: 5px;
+  right: 10px;
+  font-size: 10px;
+  color: var(--text-light);
+  opacity: 0.8;
+}
+
+body.dark-mode .last-modified {
+  color: rgba(255, 255, 255, 0.5);
 }
   </style>
 </head>
 <body>
+  <!-- Top menubar -->
   <div class="menubar">
     <div class="app-title">Simple Web Code Editor</div>
-    <div class="dropdown menubar-item">
+    <div class="menu-separator"></div>
+    <div class="menubar-item dropdown">
       <span>ファイル</span>
       <div class="dropdown-content">
-        <a href="#" id="newFileMenuItem"><i class="fas fa-file"></i>新規ファイル...</a>
-        <a href="#" id="openDirMenuItem"><i class="fas fa-folder-open"></i>フォルダを開く...</a>
+        <a href="#" id="newFileBtn"><i class="fas fa-file"></i> 新規ファイル</a>
+        <a href="#" id="newFolderBtn"><i class="fas fa-folder"></i> 新規フォルダ</a>
         <div class="dropdown-divider"></div>
-        <a href="#" id="saveFileMenuItem"><i class="fas fa-save"></i>保存</a>
-        <a href="#" id="saveAsMenuItem"><i class="fas fa-save"></i>名前を付けて保存...</a>
+        <a href="#" id="saveFileBtn"><i class="fas fa-save"></i> 保存</a>
+        <a href="#" id="saveAsBtn"><i class="fas fa-save"></i> 名前を付けて保存...</a>
         <div class="dropdown-divider"></div>
-        <a href="#" id="closeFileMenuItem"><i class="fas fa-times"></i>ファイルを閉じる</a>
+        <a href="#"><i class="fas fa-sign-out-alt"></i> 終了</a>
       </div>
     </div>
-    <div class="dropdown menubar-item">
+    <div class="menubar-item dropdown">
       <span>編集</span>
       <div class="dropdown-content">
-        <a href="#" id="undoMenuItem"><i class="fas fa-undo"></i>元に戻す</a>
-        <a href="#" id="redoMenuItem"><i class="fas fa-redo"></i>やり直す</a>
+        <a href="#" id="undoBtn"><i class="fas fa-undo"></i> 元に戻す</a>
+        <a href="#" id="redoBtn"><i class="fas fa-redo"></i> やり直し</a>
         <div class="dropdown-divider"></div>
-        <a href="#" id="cutMenuItem"><i class="fas fa-cut"></i>切り取り</a>
-        <a href="#" id="copyMenuItem"><i class="fas fa-copy"></i>コピー</a>
-        <a href="#" id="pasteMenuItem"><i class="fas fa-paste"></i>貼り付け</a>
+        <a href="#" id="cutBtn"><i class="fas fa-cut"></i> 切り取り</a>
+        <a href="#" id="copyBtn"><i class="fas fa-copy"></i> コピー</a>
+        <a href="#" id="pasteBtn"><i class="fas fa-paste"></i> 貼り付け</a>
+        <div class="dropdown-divider"></div>
+        <a href="#" id="findBtn"><i class="fas fa-search"></i> 検索</a>
+        <a href="#" id="replaceBtn"><i class="fas fa-exchange-alt"></i> 置換</a>
       </div>
     </div>
-    <div class="dropdown menubar-item">
+    <div class="menubar-item dropdown">
       <span>表示</span>
       <div class="dropdown-content">
-        <a href="#" id="toggleSidebarMenuItem"><i class="fas fa-columns"></i>サイドバーの表示切替</a>
-        <a href="#" id="toggleThemeMenuItem"><i class="fas fa-moon"></i>テーマの切替</a>
+        <a href="#" id="splitEditorBtn"><i class="fas fa-columns"></i> エディタ分割</a>
+        <a href="#" id="fullScreenBtn"><i class="fas fa-expand"></i> 全画面表示</a>
+        <div class="dropdown-divider"></div>
+        <a href="#" id="zoomInBtn"><i class="fas fa-plus"></i> 拡大</a>
+        <a href="#" id="zoomOutBtn"><i class="fas fa-minus"></i> 縮小</a>
       </div>
     </div>
-    <div class="menu-separator"></div>
-    <div class="theme-switch" id="themeSwitch">
-      <i class="fas fa-moon"></i> テーマ
-    </div>
-  </div>
-  
-  <div class="content-container">
-    <div class="editor-container">
-      <div id="fileList">
-        <h3>ファイル一覧</h3>
-        <div id="directoryOpened" style="display: none;">
-          <div class="directory-badge">
-            <i class="fas fa-folder-open"></i> <span id="currentDirName">ディレクトリ</span>
-          </div>
-          <div class="current-path" id="currentDirPath">
-            /
-          </div>
-          <div class="directory-actions">
-            <button id="parentDirBtn"><i class="fas fa-level-up-alt"></i> 上の階層へ</button>
-            <button id="createFileBtn"><i class="fas fa-file-plus"></i> 新規ファイル</button>
-            <button id="createDirBtn"><i class="fas fa-folder-plus"></i> 新規フォルダ</button>
-          </div>
-        </div>
-        <ul id="treeRoot" class="tree-view"></ul>
-      </div>
-      <div id="editorWrapper">
-        <!-- ブラウザタブのような表示を追加 -->
-        <div class="editor-tabs" id="editorTabs">
-          <!-- タブはJavaScriptで動的に追加 -->
-        </div>
-        <textarea id="editor"></textarea>
+    <div class="menubar-item dropdown">
+      <span>ヘルプ</span>
+      <div class="dropdown-content">
+        <a href="#"><i class="fas fa-question-circle"></i> ドキュメント</a>
+        <a href="#"><i class="fas fa-keyboard"></i> キーボードショートカット</a>
+        <a href="#"><i class="fas fa-info-circle"></i> バージョン情報</a>
       </div>
     </div>
-  </div>
-  
-  <div class="status-bar">
-    <div class="status-item">
-      <i class="fas fa-code"></i> HTML
+    <div style="flex: 1"></div>
+    <div class="user-info">
+      <i class="fas fa-user"></i>
+      <span id="userLoginDisplay">mituki1234</span>
     </div>
-    <div class="status-item">
-      <i class="fas fa-text-height"></i> UTF-8
+    <div class="theme-switch" id="themeToggle">
+      <i class="fas fa-moon"></i>
+      <span>ダークモード</span>
     </div>
   </div>
 
-  <!-- ディレクトリ作成モーダル -->
-  <div id="createDirModal" class="modal">
+  <!-- Main content -->
+  <div class="content-container">
+    <div class="editor-container">
+      <!-- File browser -->
+      <div id="fileList">
+        <h3>ファイル</h3>
+        <div class="current-path">
+          <i class="fas fa-folder-open"></i> /project
+        </div>
+        <div class="directory-actions">
+          <button id="newFileButton"><i class="fas fa-file"></i> 新規ファイル</button>
+          <button id="newFolderButton"><i class="fas fa-folder"></i> 新規フォルダ</button>
+        </div>
+        <ul id="filesUl">
+          <li class="active" data-filename="index.html">
+            <i class="fas fa-html5"></i>
+            <span class="file-name">index.html</span>
+            <span class="file-extension ext-html">HTML</span>
+          </li>
+          <li data-filename="styles.css">
+            <i class="fas fa-css3-alt"></i>
+            <span class="file-name">styles.css</span>
+            <span class="file-extension ext-css">CSS</span>
+          </li>
+          <li data-filename="script.js">
+            <i class="fab fa-js"></i>
+            <span class="file-name">script.js</span>
+            <span class="file-extension ext-js">JS</span>
+          </li>
+          <li data-filename="config.json">
+            <i class="fas fa-file-alt"></i>
+            <span class="file-name">config.json</span>
+            <span class="file-extension ext-json">JSON</span>
+          </li>
+          <li data-filename="README.md">
+            <i class="fas fa-file-alt"></i>
+            <span class="file-name">README.md</span>
+            <span class="file-extension ext-md">MD</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Code editor -->
+      <div id="editorWrapper">
+        <!-- Editor tabs -->
+        <div class="editor-tabs">
+          <div class="editor-tab html-tab active" data-filename="index.html">
+            <i class="tab-icon fas fa-html5"></i>
+            <span class="tab-title">index.html</span>
+            <span class="tab-close"><i class="fas fa-times"></i></span>
+          </div>
+          <div class="editor-tab css-tab" data-filename="styles.css">
+            <i class="tab-icon fas fa-css3-alt"></i>
+            <span class="tab-title">styles.css</span>
+            <span class="tab-close"><i class="fas fa-times"></i></span>
+          </div>
+          <div class="editor-tab js-tab" data-filename="script.js">
+            <i class="tab-icon fab fa-js"></i>
+            <span class="tab-title">script.js</span>
+            <span class="tab-close"><i class="fas fa-times"></i></span>
+          </div>
+        </div>
+        <textarea id="codeEditor"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="statusbar">
+    <div class="statusbar-item">
+      <i class="fas fa-code"></i>
+      <span id="currentFileType">HTML</span>
+    </div>
+    <div class="statusbar-item">
+      <i class="fas fa-align-left"></i>
+      <span id="currentPosition">行: 1, 列: 1</span>
+    </div>
+    <div class="statusbar-right">
+      <div class="statusbar-item">
+        <i class="far fa-clock"></i>
+        <span id="currentDateTime">2025-04-11 07:34:34</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for new file -->
+  <div id="newFileModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>新規フォルダの作成</h3>
+        <h3>新規ファイル作成</h3>
         <span class="modal-close">&times;</span>
       </div>
-      <div class="modal-body">
-        <div class="modal-form-group">
-          <label for="dirName">フォルダ名：</label>
-          <input type="text" id="dirName" placeholder="新しいフォルダ名">
-        </div>
+      <div class="modal-form-group">
+        <label for="fileName">ファイル名</label>
+        <input type="text" id="fileName" placeholder="拡張子付きのファイル名を入力">
       </div>
       <div class="modal-footer">
-        <button id="cancelDirBtn">キャンセル</button>
-        <button id="confirmDirBtn" style="background-color: #e41e3f;">作成</button>
+        <button id="cancelNewFile">キャンセル</button>
+        <button id="createNewFile">作成</button>
       </div>
     </div>
   </div>
