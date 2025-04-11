@@ -1,1834 +1,555 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>Simple Web Code Editor</title>
-  <!-- CodeMirror (via CDN) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/codemirror.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/javascript/javascript.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/css/css.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/htmlmixed/htmlmixed.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.7/mode/xml/xml.min.js"></script>
-  <!-- Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-  <style>
-  	body {
-  font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f5f5f5;
-  color: #333;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* 基本フォントと変数 */
-:root {
-  /* カラーパレット */
-  --primary: #4a6bfa;
-  --primary-light: #eaefff;
-  --primary-dark: #3a53c2;
-  --accent: #ff4081;
-  --dark: #1a1a2e;
-  --dark-lighter: #16213e;
-  --dark-lightest: #21325e;
-  --light: #f5f9fc;
-  --text: #2d3748;
-  --text-light: #718096;
-  --border: #e2e8f0;
-  --success: #38b2ac;
-  --warning: #f6ad55;
-  --error: #f56565;
-  --divider: rgba(0, 0, 0, 0.1);
-  
-  /* フォント */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Monaco, 'Courier New', monospace;
-  
-  /* サイズ */
-  --border-radius: 6px;
-  --transition-speed: 0.15s;
-}
-
-/* ベースリセットとフォント */
-* {
-  box-sizing: border-box;
-  transition: background-color var(--transition-speed) ease, 
-              color var(--transition-speed) ease,
-              border-color var(--transition-speed) ease,
-              box-shadow var(--transition-speed) ease;
-}
-
-body, html {
-  font-family: var(--font-sans);
-  color: var(--text);
-  margin: 0;
-  padding: 0;
-  background-color: var(--light);
-}
-
-/* Top menubar styles */
-.menubar {
-  background-color: var(--dark);
-  color: white;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  height: 38px;
-  font-size: 13px;
-  padding: 0;
-  margin: 0;
-  z-index: 1000;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-}
-
-.menubar-item {
-  padding: 0 12px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  position: relative;
-  transition: background-color 0.2s;
-}
-
-.menubar-item:hover {
-  background-color: var(--dark-lighter);
-}
-
-.menu-separator {
-  width: 1px;
-  height: 20px;
-  background-color: rgba(255, 255, 255, 0.15);
-  margin: 0 5px;
-}
-
-.app-title {
-  padding: 0 12px;
-  font-weight: 500;
-  color: white;
-  letter-spacing: 0.3px;
-}
-
-/* Main container and content area */
-.content-container {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-  background-color: var(--light);
-}
-
-/* Button styles */
-button {
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  margin-right: 10px;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 5px rgba(74, 107, 250, 0.2);
-}
-
-button:hover {
-  background-color: var(--primary-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(74, 107, 250, 0.3);
-}
-
-button:active {
-  transform: translateY(0);
-  box-shadow: 0 1px 3px rgba(74, 107, 250, 0.2);
-}
-
-button i {
-  margin-right: 6px;
-}
-
-/* Main container */
-.editor-container {
-  display: flex;
-  gap: 24px;
-  flex: 1;
-  overflow: hidden;
-  padding: 20px;
-}
-
-#fileList {
-  flex: 0 0 260px;
-  background-color: white;
-  border-radius: var(--border-radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  height: 100%;
-  overflow: auto;
-  border: 1px solid var(--border);
-}
-
-#fileList h3 {
-  margin-top: 0;
-  padding: 18px 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border);
-  color: var(--primary);
-  font-weight: 600;
-  font-size: 16px;
-}
-
-.folder-header {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding: 8px 0;
-  font-weight: 500;
-  color: var(--text);
-  transition: color 0.15s;
-}
-
-.folder-header i {
-  margin-right: 8px;
-  color: var(--primary);
-}
-
-.folder-header:hover {
-  color: var(--primary);
-}
-
-.folder-contents {
-  margin-left: 18px;
-  border-left: 1px solid var(--border);
-  padding-left: 12px;
-}
-
-#filesUl {
-  list-style-type: none;
-  padding-left: 0;
-  margin: 12px 16px;
-  border-radius: 6px;
-  min-height: 50px;
-}
-
-#filesUl li {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding: 10px 14px;
-  margin-bottom: 6px;
-  border-radius: var(--border-radius);
-  transition: all 0.15s;
-}
-
-#filesUl li i {
-  margin-right: 10px;
-  width: 16px;
-  text-align: center;
-  color: var(--text-light);
-}
-
-#filesUl li:hover {
-  background-color: var(--primary-light);
-  color: var(--primary);
-}
-
-#filesUl li:hover i {
-  color: var(--primary);
-}
-
-#filesUl li.active {
-  background-color: var(--primary-light);
-  border-left: 3px solid var(--primary);
-  padding-left: 11px;
-  color: var(--primary);
-}
-
-#filesUl li.active i {
-  color: var(--primary);
-}
-
-/* File extension styling */
-.file-name {
-  flex: 1;
-  font-size: 14px;
-}
-
-.file-extension {
-  padding: 3px 6px;
-  border-radius: 4px;
-  font-size: 10px;
-  margin-left: 8px;
-  text-transform: uppercase;
-  font-weight: bold;
-  letter-spacing: 0.5px;
-}
-
-.ext-html {
-  color: #e34c26;
-  background-color: rgba(227, 76, 38, 0.1);
-}
-
-.ext-css {
-  color: #264de4;
-  background-color: rgba(38, 77, 228, 0.1);
-}
-
-.ext-js {
-  color: #f0db4f;
-  background-color: rgba(240, 219, 79, 0.1);
-}
-
-.ext-json {
-  color: #000000;
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
-.ext-md {
-  color: #083fa1;
-  background-color: rgba(8, 63, 161, 0.1);
-}
-
-.ext-txt {
-  color: #6e6e6e;
-  background-color: rgba(110, 110, 110, 0.1);
-}
-
-.ext-php {
-  color: #777bb3;
-  background-color: rgba(119, 123, 179, 0.1);
-}
-
-.ext-py {
-  color: #306998;
-  background-color: rgba(48, 105, 152, 0.1);
-}
-
-#editorWrapper {
-  flex: 1;
-  background-color: white;
-  border-radius: var(--border-radius);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--border);
-}
-
-.CodeMirror {
-  border: none;
-  height: 100% !important;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-.CodeMirror-gutters {
-  background-color: var(--light);
-  border-right: 1px solid var(--border);
-}
-
-.CodeMirror-linenumber {
-  color: var(--text-light);
-  opacity: 0.7;
-}
-
-/* シンタックスハイライト - モダンカラースキーム */
-.cm-comment {
-  color: #888888 !important;
-  font-style: italic;
-}
-
-.cm-tag {
-  color: var(--primary) !important;
-}
-
-.cm-attribute {
-  color: #0ea5e9 !important;
-}
-
-.cm-string {
-  color: #16a34a !important;
-}
-
-.cm-bracket {
-  color: #9333ea !important;
-  font-weight: normal;
-}
-
-.cm-qualifier {
-  color: var(--primary) !important;
-}
-
-.cm-builtin {
-  color: #0ea5e9 !important;
-}
-
-.cm-property {
-  color: #0ea5e9 !important;
-}
-
-.cm-number {
-  color: #f59e0b !important;
-}
-
-.cm-atom {
-  color: var(--primary) !important;
-}
-
-.cm-variable, .cm-variable-2 {
-  color: #0ea5e9 !important;
-}
-
-.cm-variable-3 {
-  color: #9333ea !important;
-}
-
-.cm-keyword {
-  color: var(--primary) !important;
-  font-weight: 500;
-}
-
-.cm-operator {
-  color: #0ea5e9 !important;
-}
-
-.cm-def {
-  color: #9333ea !important;
-}
-
-.cm-punctuation {
-  color: #9333ea !important;
-}
-
-.cm-meta {
-  color: #888888 !important;
-}
-
-.cm-error {
-  color: var(--error) !important;
-  text-decoration: underline wavy var(--error);
-}
-
-.cm-header {
-  color: var(--primary) !important;
-  font-weight: bold;
-}
-
-.cm-quote {
-  color: #0ea5e9 !important;
-  font-style: italic;
-}
-
-.cm-link {
-  color: #0ea5e9 !important;
-  text-decoration: underline;
-}
-
-.cm-negative {
-  color: var(--primary) !important;
-}
-
-.cm-positive {
-  color: #f59e0b !important;
-}
-
-.cm-hr {
-  color: #888888 !important;
-}
-
-.cm-em {
-  color: #9333ea !important;
-  font-style: italic;
-}
-
-.cm-strong {
-  color: var(--primary) !important;
-  font-weight: bold;
-}
-
-/* HTMLタグ関連 */
-.cm-m-xml.cm-bracket {
-  color: #9333ea !important;
-}
-
-.cm-m-xml.cm-tag {
-  color: var(--primary) !important;
-}
-
-.cm-m-xml.cm-attribute {
-  color: #0ea5e9 !important;
-}
-
-/* JavaScript関連 */
-.cm-m-javascript.cm-bracket {
-  color: #9333ea !important;
-}
-
-.cm-m-javascript.cm-string-2 {
-  color: #f59e0b !important;
-}
-
-/* CSS関連 */
-.cm-m-css.cm-bracket {
-  color: #9333ea !important;
-}
-
-.cm-m-css.cm-unit {
-  color: #f59e0b !important;
-}
-
-/* エディタダークモード */
-.cm-s-darcula .CodeMirror-cursor {
-  border-left: 2px solid #f8f8f2;
-}
-
-.cm-s-darcula .CodeMirror-selected {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.cm-s-darcula .CodeMirror-line::selection,
-.cm-s-darcula .CodeMirror-line > span::selection,
-.cm-s-darcula .CodeMirror-line > span > span::selection {
-  background: rgba(255, 255, 255, 0.12);
-}
-
-/* 現在のディレクトリのパス表示 */
-.current-path {
-  background-color: var(--light);
-  padding: 10px 16px;
-  border-radius: var(--border-radius);
-  margin-bottom: 16px;
-  font-size: 13px;
-  color: var(--text-light);
-  border-left: 3px solid var(--primary);
-  display: flex;
-  align-items: center;
-}
-
-.current-path i {
-  margin-right: 8px;
-  color: var(--primary);
-}
-
-.directory-badge {
-  display: inline-flex;
-  align-items: center;
-  background-color: var(--primary);
-  color: white;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  margin-bottom: 12px;
-  font-weight: 500;
-  box-shadow: 0 2px 5px rgba(74, 107, 250, 0.2);
-}
-
-.directory-badge i {
-  margin-right: 6px;
-  font-size: 11px;
-}
-
-/* ディレクトリ操作ボタン */
-.directory-actions {
-  display: flex;
-  margin-bottom: 16px;
-  gap: 10px;
-}
-
-.directory-actions button {
-  font-size: 12px;
-  padding: 6px 12px;
-  background-color: white;
-  color: var(--text);
-  border: 1px solid var(--border);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-}
-
-.directory-actions button:hover {
-  background-color: var(--light);
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.directory-actions button i {
-  margin-right: 6px;
-  transition: transform 0.2s;
-}
-
-.directory-actions button:hover i {
-  transform: translateY(-1px);
-}
-
-/* テーマ切り替えボタン */
-.theme-switch {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 14px;
-  color: white;
-  cursor: pointer;
-  height: 100%;
-  opacity: 0.8;
-  transition: opacity 0.2s;
-}
-
-.theme-switch:hover {
-  background-color: var(--dark-lighter);
-  opacity: 1;
-}
-
-.theme-switch i {
-  margin-right: 6px;
-}
-
-/* フォルダツリー表示 */
-.tree-view {
-  margin-left: 0;
-  padding-left: 0;
-}
-
-.tree-item {
-  list-style-type: none;
-  margin-bottom: 6px;
-}
-
-.tree-dir {
-  padding-left: 0;
-}
-
-.tree-dir-contents {
-  padding-left: 20px;
-  border-left: 1px dashed var(--border);
-  margin-left: 10px;
-  margin-top: 6px;
-  display: none;
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.tree-dir-open > .tree-dir-contents {
-  display: block;
-}
-
-.tree-dir-header {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: var(--border-radius);
-  transition: all 0.15s;
-}
-
-.tree-dir-header:hover {
-  background-color: var(--primary-light);
-  color: var(--primary);
-}
-
-.tree-dir-header i {
-  margin-right: 8px;
-  color: var(--primary);
-  transition: transform 0.2s;
-}
-
-.tree-dir-open > .tree-dir-header i {
-  transform: rotate(90deg);
-}
-
-.tree-file {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: var(--border-radius);
-  transition: all 0.15s;
-}
-
-.tree-file:hover {
-  background-color: var(--primary-light);
-  color: var(--primary);
-}
-
-.tree-file i {
-  margin-right: 8px;
-  color: var(--text-light);
-}
-
-.tree-file:hover i {
-  color: var(--primary);
-}
-
-.tree-file.active {
-  background-color: var(--primary-light);
-  border-left: 3px solid var(--primary);
-  padding-left: 7px;
-  color: var(--primary);
-}
-
-.tree-file.active i {
-  color: var(--primary);
-}
-
-/* モーダル */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(2px);
-  animation: fadeIn 0.2s;
-}
-
-.modal-content {
-  background-color: #fff;
-  margin: 10% auto;
-  padding: 24px;
-  border-radius: var(--border-radius);
-  width: 450px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-  animation: slideIn 0.3s;
-}
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.modal-header h3 {
-  margin: 0;
-  color: var(--primary);
-  font-weight: 600;
-  font-size: 18px;
-}
-
-.modal-close {
-  font-size: 24px;
-  cursor: pointer;
-  color: var(--text-light);
-  transition: color 0.2s;
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-}
-
-.modal-close:hover {
-  color: var(--accent);
-  background-color: rgba(255, 64, 129, 0.08);
-}
-
-.modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 24px;
-  gap: 12px;
-}
-
-.modal-form-group {
-  margin-bottom: 20px;
-}
-
-.modal-form-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: var(--text);
-}
-
-.modal-form-group input {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1px solid var(--border);
-  border-radius: var(--border-radius);
-  font-size: 14px;
-  transition: all 0.2s;
-}
-
-.modal-form-group input:focus {
-  border-color: var(--primary);
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(74, 107, 250, 0.15);
-}
-
-/* ドロップダウンメニュー */
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: var(--dark-lighter);
-  min-width: 200px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
-  top: 38px;
-  left: 0;
-  border: 1px solid var(--dark-lightest);
-  border-radius: 0 0 var(--border-radius) var(--border-radius);
-  overflow: hidden;
-  animation: fadeIn 0.2s;
-}
-
-.dropdown-content a {
-  color: rgba(255, 255, 255, 0.85);
-  padding: 10px 16px;
-  text-decoration: none;
-  display: block;
-  font-size: 13px;
-  transition: all 0.15s;
-}
-
-.dropdown-content a:hover {
-  background-color: var(--dark-lightest);
-  color: #ffffff;
-}
-
-.dropdown:hover .dropdown-content {
-  display: block;
-}
-
-.dropdown-content .dropdown-divider {
-  height: 1px;
-  background-color: rgba(255, 255, 255, 0.1);
-  margin: 6px 0;
-}
-
-.dropdown-content a i {
-  margin-right: 10px;
-  width: 16px;
-  text-align: center;
-  opacity: 0.8;
-}
-
-/* ファイルタブ */
-.editor-tabs {
-  display: flex;
-  background-color: var(--light);
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto;
-  white-space: nowrap;
-  height: 42px;
-  align-items: stretch;
-}
-
-.editor-tab {
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  background-color: rgba(0, 0, 0, 0.02);
-  border-right: 1px solid var(--border);
-  font-size: 13px;
-  cursor: pointer;
-  position: relative;
-  min-width: 140px;
-  max-width: 220px;
-  height: 100%;
-  transition: all 0.15s;
-}
-
-.editor-tab.active {
-  background-color: white;
-  border-bottom: 2px solid var(--primary);
-  font-weight: 500;
-}
-
-.editor-tab:hover {
-  background-color: rgba(0, 0, 0, 0.03);
-}
-
-.editor-tab .tab-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
-}
-
-.editor-tab .tab-icon {
-  margin-right: 8px;
-  font-size: 14px;
-}
-
-.editor-tab .tab-close {
-  margin-left: 10px;
-  font-size: 14px;
-  opacity: 0.5;
-  padding: 4px;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-}
-
-.editor-tab .tab-close:hover {
-  background-color: rgba(0, 0, 0, 0.08);
-  opacity: 1;
-}
-
-.editor-tab.html-tab .tab-icon {
-  color: #e34c26;
-}
-
-.editor-tab.css-tab .tab-icon {
-  color: #264de4;
-}
-
-.editor-tab.js-tab .tab-icon {
-  color: #f0db4f;
-}
-
-.editor-tab.json-tab .tab-icon {
-  color: #000000;
-}
-
-.editor-tab.md-tab .tab-icon {
-  color: #083fa1;
-}
-
-.editor-tab.txt-tab .tab-icon {
-  color: #6e6e6e;
-}
-
-/* ダークモード */
-body.dark-mode {
-  background-color: var(--dark);
-  color: rgba(255, 255, 255, 0.9);
-}
-
-body.dark-mode #fileList,
-body.dark-mode #editorWrapper {
-  background-color: var(--dark-lighter);
-  border-color: var(--dark-lightest);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-body.dark-mode .folder-header,
-body.dark-mode #filesUl li {
-  color: rgba(255, 255, 255, 0.8);
-}
-
-body.dark-mode #fileList h3 {
-  border-bottom-color: var(--dark-lightest);
-}
-
-body.dark-mode .folder-contents {
-  border-left-color: var(--dark-lightest);
-}
-
-body.dark-mode #filesUl li:hover {
-  background-color: rgba(74, 107, 250, 0.15);
-}
-
-body.dark-mode #filesUl li.active {
-  background-color: rgba(74, 107, 250, 0.2);
-}
-
-body.dark-mode .tree-dir-contents {
-  border-left-color: var(--dark-lightest);
-}
-
-body.dark-mode .current-path {
-  background-color: var(--dark-lighter);
-  color: rgba(255, 255, 255, 0.6);
-}
-
-body.dark-mode .directory-actions button {
-  background-color: var(--dark-lighter);
-  border-color: var(--dark-lightest);
-  color: rgba(255, 255, 255, 0.8);
-}
-
-body.dark-mode .directory-actions button:hover {
-  background-color: var(--dark-lightest);
-  border-color: var(--primary);
-}
-
-body.dark-mode .editor-tabs {
-  background-color: var(--dark);
-  border-bottom-color: var(--dark-lightest);
-}
-
-body.dark-mode .editor-tab {
-  background-color: rgba(255, 255, 255, 0.05);
-  border-right-color: var(--dark-lightest);
-  color: rgba(255, 255, 255, 0.7);
-}
-
-body.dark-mode .editor-tab.active {
-  background-color: var(--dark-lighter);
-  color: white;
-}
-
-body.dark-mode .editor-tab:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-}
-
-body.dark-mode .editor-tab .tab-close:hover {
-  background-color: rgba(255, 255, 255, 0.15);
-}
-
-body.dark-mode .modal-content {
-  background-color: var(--dark-lighter);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-}
-
-body.dark-mode .modal-form-group label {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-body.dark-mode .modal-form-group input {
-  background-color: var(--dark-lightest);
-  border-color: var(--dark-lightest);
-  color: white;
-}
-
-body.dark-mode .modal-form-group input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(74, 107, 250, 0.25);
-}
-
-/* ステータスバー */
-.status-bar {
-  background-color: var(--primary);
-  color: white;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.status-item {
-  margin-right: 18px;
-  display: flex;
-  align-items: center;
-  opacity: 0.9;
-}
-
-.status-item i {
-  margin-right: 6px;
-}
-
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-  .editor-container {
-    flex-direction: column;
-    padding: 16px;
-    gap: 16px;
-  }
-  
-  #fileList, #editorWrapper {
-    flex: none;
-    width: 100%;
-    height: auto;
-  }
-  
-  #fileList {
-    margin-bottom: 16px;
-    height: 220px;
-  }
-  
-  #editorWrapper {
-    height: 550px;
-  }
-}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コードエディター with プレビュー</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .editor-container {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .file-tabs {
+            display: flex;
+            gap: 5px;
+        }
+
+        .file-tab {
+            padding: 8px 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px 5px 0 0;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-bottom: none;
+        }
+
+        .file-tab.active {
+            background-color: #fff;
+            border-bottom: 2px solid #4285f4;
+        }
+
+        .editor-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 15px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #3367d6;
+        }
+
+        button.secondary {
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        button.secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 15px;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+            tab-size: 4;
+        }
+
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .preview-popup {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 80%;
+            height: 80%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .popup-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .close-popup {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #333;
+        }
+
+        #preview-frame {
+            flex: 1;
+            border: none;
+            width: 100%;
+        }
+
+        .file-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .file-input input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .file-input button {
+            white-space: nowrap;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .file-manager {
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .file-list {
+            margin-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .file-actions button {
+            padding: 2px 5px;
+            font-size: 12px;
+        }
+    </style>
 </head>
 <body>
-  <div class="menubar">
-    <div class="app-title">Simple Web Code Editor</div>
-    <div class="dropdown menubar-item">
-      <span>ファイル</span>
-      <div class="dropdown-content">
-        <a href="#" id="newFileMenuItem"><i class="fas fa-file"></i>新規ファイル...</a>
-        <a href="#" id="openDirMenuItem"><i class="fas fa-folder-open"></i>フォルダを開く...</a>
-        <div class="dropdown-divider"></div>
-        <a href="#" id="saveFileMenuItem"><i class="fas fa-save"></i>保存</a>
-        <a href="#" id="saveAsMenuItem"><i class="fas fa-save"></i>名前を付けて保存...</a>
-        <div class="dropdown-divider"></div>
-        <a href="#" id="closeFileMenuItem"><i class="fas fa-times"></i>ファイルを閉じる</a>
-      </div>
-    </div>
-    <div class="dropdown menubar-item">
-      <span>編集</span>
-      <div class="dropdown-content">
-        <a href="#" id="undoMenuItem"><i class="fas fa-undo"></i>元に戻す</a>
-        <a href="#" id="redoMenuItem"><i class="fas fa-redo"></i>やり直す</a>
-        <div class="dropdown-divider"></div>
-        <a href="#" id="cutMenuItem"><i class="fas fa-cut"></i>切り取り</a>
-        <a href="#" id="copyMenuItem"><i class="fas fa-copy"></i>コピー</a>
-        <a href="#" id="pasteMenuItem"><i class="fas fa-paste"></i>貼り付け</a>
-      </div>
-    </div>
-    <div class="dropdown menubar-item">
-      <span>表示</span>
-      <div class="dropdown-content">
-        <a href="#" id="toggleSidebarMenuItem"><i class="fas fa-columns"></i>サイドバーの表示切替</a>
-        <a href="#" id="toggleThemeMenuItem"><i class="fas fa-moon"></i>テーマの切替</a>
-      </div>
-    </div>
-    <div class="menu-separator"></div>
-    <div class="theme-switch" id="themeSwitch">
-      <i class="fas fa-moon"></i> テーマ
-    </div>
-  </div>
-  
-  <div class="content-container">
-    <div class="editor-container">
-      <div id="fileList">
-        <h3>ファイル一覧</h3>
-        <div id="directoryOpened" style="display: none;">
-          <div class="directory-badge">
-            <i class="fas fa-folder-open"></i> <span id="currentDirName">ディレクトリ</span>
-          </div>
-          <div class="current-path" id="currentDirPath">
-            /
-          </div>
-          <div class="directory-actions">
-            <button id="parentDirBtn"><i class="fas fa-level-up-alt"></i> 上の階層へ</button>
-            <button id="createFileBtn"><i class="fas fa-file-plus"></i> 新規ファイル</button>
-            <button id="createDirBtn"><i class="fas fa-folder-plus"></i> 新規フォルダ</button>
-          </div>
-        </div>
-        <ul id="treeRoot" class="tree-view"></ul>
-      </div>
-      <div id="editorWrapper">
-        <!-- ブラウザタブのような表示を追加 -->
-        <div class="editor-tabs" id="editorTabs">
-          <!-- タブはJavaScriptで動的に追加 -->
-        </div>
-        <textarea id="editor"></textarea>
-      </div>
-    </div>
-  </div>
-  
-  <div class="status-bar">
-    <div class="status-item">
-      <i class="fas fa-code"></i> HTML
-    </div>
-    <div class="status-item">
-      <i class="fas fa-text-height"></i> UTF-8
-    </div>
-  </div>
-
-  <!-- ディレクトリ作成モーダル -->
-  <div id="createDirModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>新規フォルダの作成</h3>
-        <span class="modal-close">&times;</span>
-      </div>
-      <div class="modal-body">
-        <div class="modal-form-group">
-          <label for="dirName">フォルダ名：</label>
-          <input type="text" id="dirName" placeholder="新しいフォルダ名">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="cancelDirBtn">キャンセル</button>
-        <button id="confirmDirBtn" style="background-color: #e41e3f;">作成</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-/****************************************************
- * Simple Web Code Editor
- * - Uses File System Access API for folder selection
- * - Provides basic CodeMirror editor
- * - Allows creation of new files and directories
- * - Supports browser-like tabs for open files
- ****************************************************/
-
-let currentFileHandle = null;
-let directoryHandle = null;
-let parentDirectoryHandle = null;
-let editorInstance = null;
-let currentDirPath = '/';
-let isDarkMode = false;
-let dirStack = []; // ディレクトリナビゲーション用のスタック
-let openFiles = []; // 開いているファイルのリスト
-let activeTabIndex = -1; // アクティブなタブのインデックス
-
-window.addEventListener('load', () => {
-  // Initialize CodeMirror with proper line handling
-  const editorTextArea = document.getElementById('editor');
-  editorInstance = CodeMirror.fromTextArea(editorTextArea, {
-    mode: 'htmlmixed',
-    lineNumbers: true,
-    lineWrapping: true,
-    viewportMargin: Infinity,
-    theme: 'default',
-    autoCloseBrackets: true,
-    matchBrackets: true,
-    tabSize: 2,
-    indentWithTabs: false
-  });
-
-  // Top menu bar event listeners
-  document.getElementById('openDirMenuItem').addEventListener('click', openDirectory);
-  document.getElementById('newFileMenuItem').addEventListener('click', createNewFile);
-  document.getElementById('saveFileMenuItem').addEventListener('click', saveCurrentFile);
-  document.getElementById('toggleThemeMenuItem').addEventListener('click', toggleTheme);
-  document.getElementById('closeFileMenuItem').addEventListener('click', closeCurrentFile);
-  
-  // Side buttons event listeners
-  const createFileBtn = document.getElementById('createFileBtn');
-  createFileBtn.addEventListener('click', createNewFile);
-  
-  const parentDirBtn = document.getElementById('parentDirBtn');
-  parentDirBtn.addEventListener('click', navigateToParentDirectory);
-  
-  // ディレクトリ作成ボタン
-  const createDirBtn = document.getElementById('createDirBtn');
-  createDirBtn.addEventListener('click', showCreateDirModal);
-  
-  // モーダル関連のイベントリスナー
-  document.querySelector('.modal-close').addEventListener('click', hideCreateDirModal);
-  document.getElementById('cancelDirBtn').addEventListener('click', hideCreateDirModal);
-  document.getElementById('confirmDirBtn').addEventListener('click', createNewDirectory);
-  
-  // テーマ切り替え機能を追加
-  const themeSwitch = document.getElementById('themeSwitch');
-  themeSwitch.addEventListener('click', toggleTheme);
-  
-  // エディットメニューのイベントリスナー
-  document.getElementById('undoMenuItem').addEventListener('click', () => editorInstance.undo());
-  document.getElementById('redoMenuItem').addEventListener('click', () => editorInstance.redo());
-  document.getElementById('cutMenuItem').addEventListener('click', () => document.execCommand('cut'));
-  document.getElementById('copyMenuItem').addEventListener('click', () => document.execCommand('copy'));
-  document.getElementById('pasteMenuItem').addEventListener('click', () => document.execCommand('paste'));
-  
-  // サイドバー表示切替
-  document.getElementById('toggleSidebarMenuItem').addEventListener('click', toggleSidebar);
-});
-
-// サイドバーの表示切替
-function toggleSidebar() {
-  const fileList = document.getElementById('fileList');
-  if (fileList.style.display === 'none') {
-    fileList.style.display = 'block';
-  } else {
-    fileList.style.display = 'none';
-  }
-}
-
-// 言語名からモードを取得
-function getModeByLanguage(language) {
-  switch (language) {
-    case 'html': return 'htmlmixed';
-    case 'css': return 'css';
-    case 'javascript': return 'javascript';
-    default: return 'text/plain';
-  }
-}
-
-// 拡張子からファイルタイプのアイコンを取得
-function getIconForFileType(extension) {
-  switch (extension.toLowerCase()) {
-    case 'html':
-    case 'htm':
-      return '<i class="fab fa-html5 tab-icon"></i>';
-    case 'css':
-      return '<i class="fab fa-css3-alt tab-icon"></i>';
-    case 'js':
-      return '<i class="fab fa-js-square tab-icon"></i>';
-    case 'json':
-      return '<i class="fas fa-code tab-icon"></i>';
-    case 'md':
-      return '<i class="fab fa-markdown tab-icon"></i>';
-    case 'txt':
-      return '<i class="fas fa-file-alt tab-icon"></i>';
-    default:
-      return '<i class="fas fa-file-code tab-icon"></i>';
-  }
-}
-
-// 拡張子からタブのCSSクラスを取得
-function getTabClassForFileType(extension) {
-  switch (extension.toLowerCase()) {
-    case 'html':
-    case 'htm':
-      return 'html-tab';
-    case 'css':
-      return 'css-tab';
-    case 'js':
-      return 'js-tab';
-    case 'json':
-      return 'json-tab';
-    case 'md':
-      return 'md-tab';
-    case 'txt':
-      return 'txt-tab';
-    default:
-      return '';
-  }
-}
-
-// テーマの切り替え
-function toggleTheme() {
-  isDarkMode = !isDarkMode;
-  const themeSwitchElement = document.getElementById('themeSwitch');
-  
-  if (isDarkMode) {
-    editorInstance.setOption('theme', 'darcula');
-    document.body.style.backgroundColor = '#2d2d2d';
-    document.body.classList.add('dark-mode');
-    document.querySelectorAll('h1, h3').forEach(el => el.style.color = '#e41e3f');
-    themeSwitchElement.innerHTML = '<i class="fas fa-sun"></i> テーマ';
-    
-    // ダークモード時のファイルリストとエディタの背景
-    document.getElementById('fileList').style.backgroundColor = '#3a3a3a';
-    document.getElementById('fileList').style.color = '#e0e0e0';
-    document.getElementById('editorWrapper').style.backgroundColor = '#3a3a3a';
-    
-    // ディレクトリアクションボタンの見た目を調整
-    document.querySelectorAll('.directory-actions button').forEach(btn => {
-      btn.style.backgroundColor = '#444';
-      btn.style.color = '#ddd';
-      btn.style.borderColor = '#555';
-    });
-    
-    // ツリービューの見た目を調整
-    document.querySelectorAll('.tree-dir-header, .tree-file').forEach(item => {
-      item.addEventListener('mouseenter', () => {
-        item.style.backgroundColor = '#4a4a4a';
-      });
-      item.addEventListener('mouseleave', () => {
-        if (!item.classList.contains('active')) {
-          item.style.backgroundColor = '';
-        }
-      });
-    });
-  } else {
-    editorInstance.setOption('theme', 'default');
-    document.body.style.backgroundColor = '#f5f5f5';
-    document.body.classList.remove('dark-mode');
-    document.querySelectorAll('h1, h3').forEach(el => el.style.color = '#e41e3f');
-    themeSwitchElement.innerHTML = '<i class="fas fa-moon"></i> テーマ';
-    
-    // ライトモード時のファイルリストとエディタの背景
-    document.getElementById('fileList').style.backgroundColor = 'white';
-    document.getElementById('fileList').style.color = '#333';
-    document.getElementById('editorWrapper').style.backgroundColor = 'white';
-    
-    // ディレクトリアクションボタンの見た目を元に戻す
-    document.querySelectorAll('.directory-actions button').forEach(btn => {
-      btn.style.backgroundColor = '#f0f0f0';
-      btn.style.color = '#333';
-      btn.style.borderColor = '#ddd';
-    });
-    
-    // ツリービューの見た目を元に戻す
-    document.querySelectorAll('.tree-dir-header, .tree-file').forEach(item => {
-      item.addEventListener('mouseenter', () => {
-        item.style.backgroundColor = '#f5f5f5';
-      });
-      item.addEventListener('mouseleave', () => {
-        item.style.backgroundColor = '';
-      });
-    });
-  }
-}
-
-// ディレクトリを開く
-async function openDirectory() {
-  try {
-    // File System Access API を使用してディレクトリを選択
-    directoryHandle = await window.showDirectoryPicker();
-    
-    // ディレクトリが開かれたことを表示
-    document.getElementById('directoryOpened').style.display = 'block';
-    document.getElementById('currentDirName').textContent = directoryHandle.name;
-    document.getElementById('currentDirPath').textContent = '/' + directoryHandle.name;
-    
-    currentDirPath = '/' + directoryHandle.name;
-    dirStack = [directoryHandle]; // スタックをリセットして現在のディレクトリを追加
-    
-    // ファイルツリーの構築
-    await populateFileTree(directoryHandle);
-  } catch (err) {
-    console.error('ディレクトリを開く際にエラーが発生しました:', err);
-  }
-}
-
-// ファイルツリーを構築する
-async function populateFileTree(directoryHandle) {
-  const treeRoot = document.getElementById('treeRoot');
-  treeRoot.innerHTML = ''; // 既存のツリーをクリア
-  
-  try {
-    for await (const entry of directoryHandle.values()) {
-      const treeItem = document.createElement('li');
-      treeItem.className = 'tree-item';
-      
-      if (entry.kind === 'directory') {
-        // ディレクトリの場合
-        treeItem.className += ' tree-dir';
-        treeItem.innerHTML = `
-          <div class="tree-dir-header">
-            <i class="fas fa-folder"></i>
-            <span class="tree-dir-name">${entry.name}</span>
-          </div>
-          <ul class="tree-dir-contents"></ul>
-        `;
+    <div class="container">
+        <h1>コードエディター with プレビュー</h1>
         
-        const dirHeader = treeItem.querySelector('.tree-dir-header');
-        dirHeader.addEventListener('click', async function() {
-          const parentItem = this.parentNode;
-          const dirContents = parentItem.querySelector('.tree-dir-contents');
-          
-          if (parentItem.classList.contains('tree-dir-open')) {
-            // 既に開いているならば閉じる
-            parentItem.classList.remove('tree-dir-open');
-            this.querySelector('i').className = 'fas fa-folder';
-          } else {
-            // 閉じているならば開いて内容を読み込む
-            parentItem.classList.add('tree-dir-open');
-            this.querySelector('i').className = 'fas fa-folder-open';
+        <div class="editor-container">
+            <div class="editor-header">
+                <div class="file-tabs">
+                    <div class="file-tab active" data-file="html">HTML</div>
+                    <div class="file-tab" data-file="css">CSS</div>
+                    <div class="file-tab" data-file="js">JavaScript</div>
+                </div>
+                
+                <div class="editor-buttons">
+                    <button id="add-file-btn">ファイル追加</button>
+                    <button id="preview-btn">プレビュー表示</button>
+                </div>
+            </div>
             
-            // サブディレクトリの内容を取得
-            if (dirContents.children.length === 0) {
-              try {
-                for await (const subEntry of entry.values()) {
-                  const subItem = document.createElement('li');
-                  
-                  if (subEntry.kind === 'directory') {
-                    // サブディレクトリの場合（再帰的にツリー構造を構築）
-                    subItem.className = 'tree-item tree-dir';
-                    subItem.innerHTML = `
-                      <div class="tree-dir-header">
-                        <i class="fas fa-folder"></i>
-                        <span class="tree-dir-name">${subEntry.name}</span>
-                      </div>
-                      <ul class="tree-dir-contents"></ul>
-                    `;
-                    
-                    // サブディレクトリのクリックイベント
-                    subItem.querySelector('.tree-dir-header').addEventListener('click', async function(e) {
-                      e.stopPropagation(); // 親要素へのイベント伝播を防止
-                      
-                      const subParentItem = this.parentNode;
-                      const subDirContents = subParentItem.querySelector('.tree-dir-contents');
-                      
-                      if (subParentItem.classList.contains('tree-dir-open')) {
-                        subParentItem.classList.remove('tree-dir-open');
-                        this.querySelector('i').className = 'fas fa-folder';
-                      } else {
-                        subParentItem.classList.add('tree-dir-open');
-                        this.querySelector('i').className = 'fas fa-folder-open';
-                        
-                        // サブサブディレクトリの内容を取得（再帰的に処理する場合はここでさらに処理）
-                      }
-                    });
-                  } else {
-                    // ファイルの場合
-                    subItem.className = 'tree-item tree-file';
-                    subItem.innerHTML = `
-                      <i class="fas fa-file-code"></i>
-                      <span class="tree-file-name">${subEntry.name}</span>
-                    `;
-                    
-                    // ファイルのクリックイベント
-                    subItem.addEventListener('click', async function() {
-                      try {
-                        await openFile(subEntry);
-                        
-                        // アクティブファイルのスタイルを適用
-                        document.querySelectorAll('.tree-file').forEach(file => {
-                          file.classList.remove('active');
-                        });
-                        this.classList.add('active');
-                      } catch (err) {
-                        console.error('ファイルを開く際にエラーが発生しました:', err);
-                      }
-                    });
-                  }
-                  
-                  dirContents.appendChild(subItem);
+            <div class="file-input hidden">
+                <input type="text" id="file-path" placeholder="ファイルパス (例: styles/main.css)">
+                <select id="file-type">
+                    <option value="css">CSS</option>
+                    <option value="js">JavaScript</option>
+                </select>
+                <button id="save-file-btn">保存</button>
+                <button id="cancel-file-btn" class="secondary">キャンセル</button>
+            </div>
+            
+            <textarea id="html-editor" placeholder="HTMLを入力してください"></textarea>
+            <textarea id="css-editor" class="hidden" placeholder="CSSを入力してください"></textarea>
+            <textarea id="js-editor" class="hidden" placeholder="JavaScriptを入力してください"></textarea>
+            
+            <div class="file-manager">
+                <h3>関連ファイル</h3>
+                <div class="file-list" id="file-list">
+                    <!-- ファイルリストがここに表示されます -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup-overlay" id="popup-overlay">
+        <div class="preview-popup">
+            <div class="popup-header">
+                <h2>プレビュー</h2>
+                <button class="close-popup" id="close-popup">&times;</button>
+            </div>
+            <iframe id="preview-frame"></iframe>
+        </div>
+    </div>
+
+    <script>
+        // ファイル管理
+        const files = {
+            'index.html': '',
+            'style.css': '',
+            'script.js': ''
+        };
+        
+        const customFiles = {};
+        
+        // DOM要素
+        const htmlEditor = document.getElementById('html-editor');
+        const cssEditor = document.getElementById('css-editor');
+        const jsEditor = document.getElementById('js-editor');
+        const fileTabs = document.querySelectorAll('.file-tab');
+        const previewBtn = document.getElementById('preview-btn');
+        const popupOverlay = document.getElementById('popup-overlay');
+        const closePopupBtn = document.getElementById('close-popup');
+        const previewFrame = document.getElementById('preview-frame');
+        const addFileBtn = document.getElementById('add-file-btn');
+        const fileInput = document.querySelector('.file-input');
+        const filePathInput = document.getElementById('file-path');
+        const fileTypeSelect = document.getElementById('file-type');
+        const saveFileBtn = document.getElementById('save-file-btn');
+        const cancelFileBtn = document.getElementById('cancel-file-btn');
+        const fileList = document.getElementById('file-list');
+        
+        // 初期設定
+        htmlEditor.value = '<!DOCTYPE html>\n<html>\n<head>\n  <title>マイページ</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n  <h1>こんにちは、世界！</h1>\n  \n  <script src="script.js"><\/script>\n</body>\n</html>';
+        cssEditor.value = 'body {\n  font-family: Arial, sans-serif;\n  margin: 20px;\n  background-color: #f0f0f0;\n}\n\nh1 {\n  color: #333;\n  text-align: center;\n}';
+        jsEditor.value = 'document.addEventListener("DOMContentLoaded", function() {\n  console.log("ページが読み込まれました！");\n});';
+        
+        files['index.html'] = htmlEditor.value;
+        files['style.css'] = cssEditor.value;
+        files['script.js'] = jsEditor.value;
+        
+        // ファイルタブの切り替え
+        fileTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const fileType = tab.getAttribute('data-file');
+                
+                // アクティブなタブを切り替え
+                fileTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // エディターを切り替え
+                htmlEditor.classList.add('hidden');
+                cssEditor.classList.add('hidden');
+                jsEditor.classList.add('hidden');
+                
+                if (fileType === 'html') {
+                    htmlEditor.classList.remove('hidden');
+                } else if (fileType === 'css') {
+                    cssEditor.classList.remove('hidden');
+                } else if (fileType === 'js') {
+                    jsEditor.classList.remove('hidden');
                 }
-              } catch (err) {
-                console.error('サブディレクトリの内容を読み込む際にエラーが発生しました:', err);
-              }
-            }
-          }
-        });
-      } else {
-        // ファイルの場合
-        treeItem.className += ' tree-file';
-        treeItem.innerHTML = `
-          <i class="fas fa-file-code"></i>
-          <span class="tree-file-name">${entry.name}</span>
-        `;
-        
-        treeItem.addEventListener('click', async function() {
-          try {
-            await openFile(entry);
-            
-            // アクティブファイルのスタイルを適用
-            document.querySelectorAll('.tree-file').forEach(file => {
-              file.classList.remove('active');
             });
-            this.classList.add('active');
-          } catch (err) {
-            console.error('ファイルを開く際にエラーが発生しました:', err);
-          }
         });
-      }
-      
-      treeRoot.appendChild(treeItem);
-    }
-  } catch (err) {
-    console.error('ファイルツリーを構築する際にエラーが発生しました:', err);
-  }
-}
-
-// タブ一覧を更新する
-function updateTabs() {
-  const tabsContainer = document.getElementById('editorTabs');
-  tabsContainer.innerHTML = '';
-  
-  openFiles.forEach((file, index) => {
-    const tab = document.createElement('div');
-    const fileExtension = file.name.split('.').pop();
-    tab.className = `editor-tab ${getTabClassForFileType(fileExtension)} ${index === activeTabIndex ? 'active' : ''}`;
-    tab.innerHTML = `
-      ${getIconForFileType(fileExtension)}
-      <span class="tab-title">${file.name}</span>
-      <span class="tab-close"><i class="fas fa-times"></i></span>
-    `;
-    
-    // タブクリックイベント（タブの切替）
-    tab.addEventListener('click', async (e) => {
-      if (!e.target.closest('.tab-close')) {
-        switchTab(index);
-      }
-    });
-    
-    // タブ閉じるボタンのクリックイベント
-    const closeBtn = tab.querySelector('.tab-close');
-    closeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      closeTab(index);
-    });
-    
-    tabsContainer.appendChild(tab);
-  });
-}
-
-// ファイルを開く
-async function openFile(fileHandle) {
-  try {
-    // 既にタブが開いているか確認
-    const existingTabIndex = openFiles.findIndex(file => file.name === fileHandle.name);
-    
-    if (existingTabIndex !== -1) {
-      // 既に開いているタブに切り替える
-      switchTab(existingTabIndex);
-      return;
-    }
-    
-    // ファイルハンドルを保存
-    currentFileHandle = fileHandle;
-    
-    // ファイルを読み込む
-    const file = await fileHandle.getFile();
-    const contents = await file.text();
-    
-    // エディタにファイル内容を設定
-    editorInstance.setValue(contents);
-    
-    // ファイルタイプに基づいてモードを設定
-    const fileExtension = file.name.split('.').pop().toLowerCase();
-    let mode = getModeForExtension(fileExtension);
-    editorInstance.setOption('mode', mode);
-    
-    // ステータスバーの更新
-    updateStatusBar(fileExtension.toUpperCase());
-    
-    // 開いているファイルリストに追加
-    openFiles.push(fileHandle);
-    activeTabIndex = openFiles.length - 1;
-    
-    // タブを更新
-    updateTabs();
-    
-    // エディタにフォーカス
-    editorInstance.focus();
-  } catch (err) {
-    console.error('ファイルを開く際にエラーが発生しました:', err);
-  }
-}
-
-// タブを切り替える
-async function switchTab(index) {
-  if (index < 0 || index >= openFiles.length) return;
-  
-  try {
-    // 現在のファイルの内容を保存（任意）
-    // saveFileContent(activeTabIndex);
-    
-    // 新しいタブのインデックスを設定
-    activeTabIndex = index;
-    currentFileHandle = openFiles[index];
-    
-    // ファイルを読み込む
-    const file = await currentFileHandle.getFile();
-    const contents = await file.text();
-    
-    // エディタにファイル内容を設定
-    editorInstance.setValue(contents);
-    
-    // ファイルタイプに基づいてモードを設定
-    const fileExtension = file.name.split('.').pop().toLowerCase();
-    let mode = getModeForExtension(fileExtension);
-    editorInstance.setOption('mode', mode);
-    
-    // ステータスバーの更新
-    updateStatusBar(fileExtension.toUpperCase());
-    
-    // タブを更新
-    updateTabs();
-    
-    // エディタにフォーカス
-    editorInstance.focus();
-  } catch (err) {
-    console.error('タブを切り替える際にエラーが発生しました:', err);
-  }
-}
-
-// タブを閉じる
-function closeTab(index) {
-  if (index < 0 || index >= openFiles.length) return;
-  
-  // 閉じるタブがアクティブな場合は別のタブをアクティブにする
-  if (index === activeTabIndex) {
-    if (openFiles.length > 1) {
-      // 閉じたタブの右隣か左隣をアクティブにする
-      const newIndex = index === openFiles.length - 1 ? index - 1 : index;
-      openFiles.splice(index, 1);
-      activeTabIndex = newIndex;
-      
-      // 新しいアクティブタブを表示
-      if (activeTabIndex >= 0) {
-        switchTab(activeTabIndex);
-      } else {
-        // 開いているファイルがなくなった
-        currentFileHandle = null;
-        editorInstance.setValue('');
-        editorInstance.setOption('mode', 'text/plain');
-        updateStatusBar('TXT');
-      }
-    } else {
-      // 最後のタブを閉じる
-      openFiles = [];
-      activeTabIndex = -1;
-      currentFileHandle = null;
-      editorInstance.setValue('');
-      editorInstance.setOption('mode', 'text/plain');
-      updateStatusBar('TXT');
-    }
-  } else {
-    // アクティブでないタブを閉じる場合、インデックスを調整
-    openFiles.splice(index, 1);
-    if (index < activeTabIndex) {
-      activeTabIndex--;
-    }
-  }
-  
-  // タブ表示を更新
-  updateTabs();
-}
-
-// 現在のタブを閉じる
-function closeCurrentFile() {
-  if (activeTabIndex >= 0) {
-    closeTab(activeTabIndex);
-  }
-}
-
-// 拡張子からモードを取得
-function getModeForExtension(extension) {
-  switch (extension) {
-    case 'html':
-    case 'htm':
-      return 'htmlmixed';
-    case 'css':
-      return 'css';
-    case 'js':
-      return 'javascript';
-    case 'json':
-      return { name: 'javascript', json: true };
-    case 'md':
-      return 'markdown';
-    case 'php':
-      return 'php';
-    case 'py':
-      return 'python';
-    default:
-      return 'text/plain';
-  }
-}
-
-// ステータスバーの更新
-function updateStatusBar(fileType) {
-  const statusItem = document.querySelector('.status-bar .status-item:first-child');
-  statusItem.innerHTML = `<i class="fas fa-code"></i> ${fileType}`;
-}
-
-// 新規ファイル作成
-async function createNewFile() {
-  if (!directoryHandle) {
-    alert('最初にフォルダを開いてください。');
-    return;
-  }
-  
-  const fileName = prompt('新規ファイル名を入力してください:');
-  if (!fileName) return;
-  
-  try {
-    // 新しいファイルを作成
-    const newFileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
-    
-    // 空のファイルを書き込む
-    const writable = await newFileHandle.createWritable();
-    await writable.write('');
-    await writable.close();
-    
-    // ファイルリストを更新
-    await populateFileTree(directoryHandle);
-    
-    // 新しいファイルを開く
-    await openFile(newFileHandle);
-  } catch (err) {
-    console.error('新規ファイル作成中にエラーが発生しました:', err);
-  }
-}
-
-// 現在のファイルを保存
-async function saveCurrentFile() {
-  if (!currentFileHandle) {
-    alert('保存するファイルがありません。');
-    return;
-  }
-  
-  try {
-    // ファイルに書き込むためのWritableStreamを取得
-    const writable = await currentFileHandle.createWritable();
-    
-    // エディタの内容を取得
-    const content = editorInstance.getValue();
-    
-    // ファイルに書き込む
-    await writable.write(content);
-    await writable.close();
-    
-    alert('ファイルを保存しました。');
-  } catch (err) {
-    console.error('ファイル保存中にエラーが発生しました:', err);
-  }
-}
-
-// ディレクトリ作成モーダルを表示
-function showCreateDirModal() {
-  if (!directoryHandle) {
-    alert('最初にフォルダを開いてください。');
-    return;
-  }
-  
-  const modal = document.getElementById('createDirModal');
-  modal.style.display = 'block';
-}
-
-// ディレクトリ作成モーダルを非表示
-function hideCreateDirModal() {
-  const modal = document.getElementById('createDirModal');
-  modal.style.display = 'none';
-}
-
-// 新規ディレクトリ作成
-async function createNewDirectory() {
-  const dirNameInput = document.getElementById('dirName');
-  const dirName = dirNameInput.value.trim();
-  
-  if (!dirName) {
-    alert('フォルダ名を入力してください。');
-    return;
-  }
-  
-  try {
-    // 新しいディレクトリを作成
-    await directoryHandle.getDirectoryHandle(dirName, { create: true });
-    
-    // ファイルリストを更新
-    await populateFileTree(directoryHandle);
-    
-    // モーダルを閉じる
-    hideCreateDirModal();
-    dirNameInput.value = '';
-  } catch (err) {
-    console.error('新規ディレクトリ作成中にエラーが発生しました:', err);
-  }
-}
-
-// 親ディレクトリへ移動
-function navigateToParentDirectory() {
-  if (dirStack.length <= 1) {
-    alert('これ以上上の階層に移動できません。');
-    return;
-  }
-  
-  // 現在のディレクトリをスタックから削除
-  dirStack.pop();
-  
-  // 親ディレクトリを現在のディレクトリとして設定
-  directoryHandle = dirStack[dirStack.length - 1];
-  
-  // パス表示を更新
-  updatePathDisplay();
-  
-  // ファイルリストを更新
-  populateFileTree(directoryHandle);
-}
-
-// パス表示の更新
-function updatePathDisplay() {
-  // ディレクトリスタックからパスを構築
-  let path = '';
-  for (const dirHandle of dirStack) {
-    path += '/' + dirHandle.name;
-  }
-  
-  document.getElementById('currentDirName').textContent = directoryHandle.name;
-  document.getElementById('currentDirPath').textContent = path || '/';
-  currentDirPath = path || '/';
-}
-  </script>
+        
+        // ファイルの自動保存
+        htmlEditor.addEventListener('input', () => {
+            files['index.html'] = htmlEditor.value;
+        });
+        
+        cssEditor.addEventListener('input', () => {
+            files['style.css'] = cssEditor.value;
+        });
+        
+        jsEditor.addEventListener('input', () => {
+            files['script.js'] = jsEditor.value;
+        });
+        
+        // ファイル追加UI表示
+        addFileBtn.addEventListener('click', () => {
+            fileInput.classList.toggle('hidden');
+        });
+        
+        // ファイル追加キャンセル
+        cancelFileBtn.addEventListener('click', () => {
+            fileInput.classList.add('hidden');
+            filePathInput.value = '';
+        });
+        
+        // 新しいファイルを追加
+        saveFileBtn.addEventListener('click', () => {
+            const filePath = filePathInput.value.trim();
+            const fileType = fileTypeSelect.value;
+            
+            if (filePath) {
+                // 拡張子をチェック
+                let extension = filePath.split('.').pop().toLowerCase();
+                if (fileType === 'css' && extension !== 'css') {
+                    alert('CSSファイルの拡張子は.cssである必要があります');
+                    return;
+                } else if (fileType === 'js' && extension !== 'js') {
+                    alert('JavaScriptファイルの拡張子は.jsである必要があります');
+                    return;
+                }
+                
+                // 既存ファイルをチェック
+                if (files[filePath] || customFiles[filePath]) {
+                    alert('このファイルは既に存在します');
+                    return;
+                }
+                
+                // 新しいファイルを追加
+                customFiles[filePath] = '';
+                updateFileList();
+                
+                fileInput.classList.add('hidden');
+                filePathInput.value = '';
+            } else {
+                alert('有効なファイルパスを入力してください');
+            }
+        });
+        
+        // ファイルリストの更新
+        function updateFileList() {
+            fileList.innerHTML = '';
+            
+            // メインファイル
+            const mainFileHTML = `
+                <div class="file-item">
+                    <span>index.html (HTML)</span>
+                </div>
+                <div class="file-item">
+                    <span>style.css (CSS)</span>
+                </div>
+                <div class="file-item">
+                    <span>script.js (JavaScript)</span>
+                </div>
+            `;
+            fileList.innerHTML = mainFileHTML;
+            
+            // カスタムファイル
+            Object.keys(customFiles).forEach(filePath => {
+                const fileType = filePath.split('.').pop().toLowerCase();
+                const fileTypeLabel = fileType === 'css' ? 'CSS' : fileType === 'js' ? 'JavaScript' : 'その他';
+                
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span>${filePath} (${fileTypeLabel})</span>
+                    <div class="file-actions">
+                        <button class="edit-file" data-path="${filePath}">編集</button>
+                        <button class="delete-file" data-path="${filePath}">削除</button>
+                    </div>
+                `;
+                fileList.appendChild(fileItem);
+            });
+            
+            // ファイル編集/削除イベントリスナー
+            document.querySelectorAll('.edit-file').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const filePath = e.target.getAttribute('data-path');
+                    editCustomFile(filePath);
+                });
+            });
+            
+            document.querySelectorAll('.delete-file').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const filePath = e.target.getAttribute('data-path');
+                    deleteCustomFile(filePath);
+                });
+            });
+        }
+        
+        // カスタムファイルの編集
+        function editCustomFile(filePath) {
+            const fileType = filePath.split('.').pop().toLowerCase();
+            let editor;
+            
+            if (fileType === 'css') {
+                editor = cssEditor;
+                fileTabs[1].click(); // CSSタブを選択
+            } else if (fileType === 'js') {
+                editor = jsEditor;
+                fileTabs[2].click(); // JSタブを選択
+            } else {
+                alert('このファイルタイプは編集できません');
+                return;
+            }
+            
+            // 現在の内容を保存
+            if (fileType === 'css') {
+                files['style.css'] = cssEditor.value;
+            } else if (fileType === 'js') {
+                files['script.js'] = jsEditor.value;
+            }
+            
+            // エディターにファイルの内容をロード
+            editor.value = customFiles[filePath] || '';
+            
+            // エディターの変更を監視して現在編集中のファイルに保存
+            const inputHandler = () => {
+                customFiles[filePath] = editor.value;
+            };
+            
+            // 古いイベントリスナーを削除
+            editor.removeEventListener('input', inputHandler);
+            
+            // 新しいイベントリスナーを追加
+            editor.addEventListener('input', inputHandler);
+            
+               // 現在編集中のファイルを表示
+               const activeEditor = document.querySelector('.file-tab.active').getAttribute('data-file');
+               alert("現在 " + filePath + " を編集中です");
+        }
+        
+        // カスタムファイルの削除
+        function deleteCustomFile(filePath) {
+            if (confirm(`${filePath} を削除してもよろしいですか？`)) {
+                delete customFiles[filePath];
+                updateFileList();
+            }
+        }
+        
+        // 初期ファイルリストの更新
+        updateFileList();
+        
+        // プレビュー表示
+        previewBtn.addEventListener('click', () => {
+            // エディターの内容を更新
+            files['index.html'] = htmlEditor.value;
+            files['style.css'] = cssEditor.value;
+            files['script.js'] = jsEditor.value;
+            
+            // プレビューを生成して表示
+            generatePreview();
+            popupOverlay.style.display = 'flex';
+        });
+        
+        // プレビューを閉じる
+        closePopupBtn.addEventListener('click', () => {
+            popupOverlay.style.display = 'none';
+        });
+        
+        // 外側をクリックしてもプレビューを閉じられるように
+        popupOverlay.addEventListener('click', (e) => {
+            if (e.target === popupOverlay) {
+                popupOverlay.style.display = 'none';
+            }
+        });
+        
+        // プレビューの生成
+        function generatePreview() {
+            const iframe = document.getElementById('preview-frame');
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            
+            // iframeの内容をクリア
+            iframeDoc.open();
+            
+            // Blobを使用してファイルURLを作成
+            const htmlBlob = new Blob([files['index.html']], { type: 'text/html' });
+            const cssBlob = new Blob([files['style.css']], { type: 'text/css' });
+            const jsBlob = new Blob([files['script.js']], { type: 'text/javascript' });
+            
+            // メインファイルのURLを作成
+            const htmlUrl = URL.createObjectURL(htmlBlob);
+            const cssUrl = URL.createObjectURL(cssBlob);
+            const jsUrl = URL.createObjectURL(jsBlob);
+            
+            // カスタムファイルのURLを作成
+            const customFileUrls = {};
+            Object.keys(customFiles).forEach(filePath => {
+                const fileType = filePath.split('.').pop().toLowerCase();
+                let mimeType = 'text/plain';
+                
+                if (fileType === 'css') {
+                    mimeType = 'text/css';
+                } else if (fileType === 'js') {
+                    mimeType = 'text/javascript';
+                } else if (fileType === 'html') {
+                    mimeType = 'text/html';
+                }
+                
+                const blob = new Blob([customFiles[filePath]], { type: mimeType });
+                customFileUrls[filePath] = URL.createObjectURL(blob);
+            });
+            
+            // カスタムファイルへの参照を置き換え
+            let htmlContent = files['index.html'];
+            
+            // style.cssとscript.jsの参照を置き換え
+            htmlContent = htmlContent.replace(/href\s*=\s*["']style\.css["']/g, `href="${cssUrl}"`);
+            htmlContent = htmlContent.replace(/src\s*=\s*["']script\.js["']/g, `src="${jsUrl}"`);
+            
+            // カスタムファイルの参照を置き換え
+            Object.keys(customFileUrls).forEach(filePath => {
+                const escapedPath = filePath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp('(href|src)\\s*=\\s*["\']' + escapedPath + '["\']', 'g');
+                htmlContent = htmlContent.replace(regex, `$1="${customFileUrls[filePath]}"`);
+            });
+            
+            // HTMLをiframeに書き込む
+            iframeDoc.write(htmlContent);
+            iframeDoc.close();
+        }
+    </script>
 </body>
 </html>
