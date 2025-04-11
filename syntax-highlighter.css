@@ -1,0 +1,74 @@
+/* Syntax Highlighter Styles */
+
+/* Common token styles */
+.token.keyword {
+  color: #07a;
+}
+.token.string {
+  color: #d20;
+}
+.token.number {
+  color: #164;
+}
+.token.boolean {
+  color: #07a;
+}
+.token.comment {
+  color: #998;
+  font-style: italic;
+}
+.token.operator {
+  color: #a67f59;
+}
+.token.function {
+  color: #dd4a68;
+}
+.token.punctuation {
+  color: #999;
+}
+.token.regex {
+  color: #e90;
+}
+.token.property {
+  color: #905;
+}
+
+/* HTML-specific tokens */
+.token.tag {
+  color: #170;
+}
+.token.attr-name {
+  color: #00c;
+}
+.token.attr-value {
+  color: #d20;
+}
+
+/* CSS-specific tokens */
+.token.selector {
+  color: #11a;
+}
+.token.important {
+  color: #e90;
+  font-weight: bold;
+}
+.token.variable {
+  color: #e90;
+}
+.token.entity {
+  color: #999;
+  background: rgba(255, 255, 255, 0.5);
+}
+.token.doctype {
+  color: #999;
+  font-style: italic;
+}
+.token.url {
+  color: #00c;
+}
+.token.unit {
+  color: #a67f59;
+}
+.token.color {
+  color: #c0f;
+}
